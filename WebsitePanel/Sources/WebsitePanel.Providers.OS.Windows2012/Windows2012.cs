@@ -183,6 +183,9 @@ namespace WebsitePanel.Providers.OS
         {
             Log.WriteStart("GetQuotasLimitsForOrganization");
 
+            // 05.09.2015 roland.breitschaft@x-company.de
+            // New: Add LogInfo
+            Log.WriteInfo("FolderPath : {0}", folderPath);
 
             Runspace runSpace = null;
             Quota quota = null;
@@ -193,8 +196,9 @@ namespace WebsitePanel.Providers.OS
                 runSpace = OpenRunspace();
 
                 Command cmd = new Command("Get-FsrmQuota");
+
                 cmd.Parameters.Add("Path", folderPath + "\\*");
-                var result = ExecuteShellCommand(runSpace, cmd, false);
+                var result = ExecuteShellCommand(runSpace, cmd, false);                
 
                 if (result.Count > 0)
                 {
@@ -209,7 +213,6 @@ namespace WebsitePanel.Providers.OS
                         quotas.Add(Convert.ToString(GetPSObjectProperty(element, "Path")), quota);
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -413,6 +416,14 @@ namespace WebsitePanel.Providers.OS
         internal Collection<PSObject> ExecuteShellCommand(Runspace runSpace, Command cmd, bool useDomainController, out object[] errors)
         {
             Log.WriteStart("ExecuteShellCommand");
+
+            // 05.09.2015 roland.breitschaft@x-company.de
+            // New: Add LogInfo
+            Log.WriteInfo("Command              : {0}", cmd.CommandText);
+            foreach (var par in cmd.Parameters)            
+                Log.WriteInfo("Parameter            : Name {0}, Value {1}", par.Name, par.Value);
+            Log.WriteInfo("UseDomainController  : {0}", useDomainController);
+
             List<object> errorList = new List<object>();
 
             if (useDomainController)

@@ -320,7 +320,7 @@ namespace WebsitePanel.EnterpriseServer
 
         public static int CreateOrganization(int packageId, string organizationId, string organizationName, string domainName)
         {
-            int itemId;
+            int itemId = 0;
             int errorCode;
             if (!CheckQuotas(packageId, out errorCode))
                 return errorCode;
@@ -466,7 +466,10 @@ namespace WebsitePanel.EnterpriseServer
                 //rollback organization
                 try
                 {
-                    RollbackOrganization(packageId, organizationId);
+                    if (itemId <= 0)
+                        RollbackOrganization(packageId, organizationId);
+                    else
+                        DeleteOrganization(itemId);
                 }
                 catch (Exception rollbackException)
                 {

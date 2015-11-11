@@ -152,14 +152,20 @@ namespace WebsitePanel.Setup.Actions
 		void IInstallAction.Run(SetupVariables vars)
 		{
 			// Exit with an error if Windows account with the same name already exists
+            if (vars.NewUserAccount)
+            {
 			if (SecurityUtils.UserExists(vars.UserDomain, vars.UserAccount))
 				throw new Exception(UserAccountExists);
 			//
 			CreateUserAccount(vars);
 		}
+		}
 
 		void IUninstallAction.Run(SetupVariables vars)
 		{
+            if (!vars.NewUserAccount)
+                return;
+
 			try
 			{
 				Log.WriteStart(LogStartRollbackMessage);
@@ -920,7 +926,7 @@ namespace WebsitePanel.Setup.Actions
 			AppConfig.SetComponentSettingBooleanValue(vars.ComponentId, "NewWebSite", vars.NewWebSite);
 			AppConfig.SetComponentSettingBooleanValue(vars.ComponentId, "NewVirtualDirectory", vars.NewVirtualDirectory);
 			//
-			AppConfig.SetComponentSettingBooleanValue(vars.ComponentId, "NewUserAccount", true);
+			AppConfig.SetComponentSettingBooleanValue(vars.ComponentId, "NewUserAccount", vars.NewUserAccount);
 			AppConfig.SetComponentSettingStringValue(vars.ComponentId, "UserAccount", vars.UserAccount);
 			AppConfig.SetComponentSettingStringValue(vars.ComponentId, "Domain", vars.UserDomain);
 			//

@@ -1167,29 +1167,37 @@ namespace WebsitePanel.Providers.HostedSolution
             ExchangeLog.LogStart("DeleteOrganizationMailboxes");
             bool ret = true;
 
-            Command cmd = new Command("Get-Mailbox");
-            cmd.Parameters.Add("OrganizationalUnit", ou);
-            if (publicFolder) cmd.Parameters.Add("PublicFolder");
-
-            Collection<PSObject> result = ExecuteShellCommand(runSpace, cmd);
-            if (result != null && result.Count > 0)
+            try
             {
-                foreach (PSObject obj in result)
-                {
-                    string id = null;
-                    try
-                    {
-                        id = ObjToString(GetPSObjectProperty(obj, "Identity"));
-                        RemoveDevicesInternal(runSpace, id);
+                Command cmd = new Command("Get-Mailbox");
+                cmd.Parameters.Add("OrganizationalUnit", ou);
+                if (publicFolder) cmd.Parameters.Add("PublicFolder");
 
-                        RemoveMailbox(runSpace, id, publicFolder);
-                    }
-                    catch (Exception ex)
+                Collection<PSObject> result = ExecuteShellCommand(runSpace, cmd);
+                if (result != null && result.Count > 0)
+                {
+                    foreach (PSObject obj in result)
                     {
-                        ret = false;
-                        ExchangeLog.LogError(string.Format("Can't delete mailbox {0}", id), ex);
+                        string id = null;
+                        try
+                        {
+                            id = ObjToString(GetPSObjectProperty(obj, "Identity"));
+                            RemoveDevicesInternal(runSpace, id);
+
+                            RemoveMailbox(runSpace, id, publicFolder);
+                        }
+                        catch (Exception ex)
+                        {
+                            ret = false;
+                            ExchangeLog.LogError(string.Format("Can't delete mailbox {0}", id), ex);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                ret = false;
+                ExchangeLog.LogError(string.Format("Can't get mailboxes for {0}", ou), ex);
             }
 
             ExchangeLog.LogEnd("DeleteOrganizationMailboxes");
@@ -1201,25 +1209,33 @@ namespace WebsitePanel.Providers.HostedSolution
             ExchangeLog.LogStart("DeleteOrganizationContacts");
             bool ret = true;
 
-            Command cmd = new Command("Get-MailContact");
-            cmd.Parameters.Add("OrganizationalUnit", ou);
-            Collection<PSObject> result = ExecuteShellCommand(runSpace, cmd);
-            if (result != null && result.Count > 0)
+            try
             {
-                foreach (PSObject obj in result)
+                Command cmd = new Command("Get-MailContact");
+                cmd.Parameters.Add("OrganizationalUnit", ou);
+                Collection<PSObject> result = ExecuteShellCommand(runSpace, cmd);
+                if (result != null && result.Count > 0)
                 {
-                    string id = null;
-                    try
+                    foreach (PSObject obj in result)
                     {
-                        id = ObjToString(GetPSObjectProperty(obj, "Identity"));
-                        RemoveContact(runSpace, id);
-                    }
-                    catch (Exception ex)
-                    {
-                        ret = false;
-                        ExchangeLog.LogError(string.Format("Can't delete contact {0}", id), ex);
+                        string id = null;
+                        try
+                        {
+                            id = ObjToString(GetPSObjectProperty(obj, "Identity"));
+                            RemoveContact(runSpace, id);
+                        }
+                        catch (Exception ex)
+                        {
+                            ret = false;
+                            ExchangeLog.LogError(string.Format("Can't delete contact {0}", id), ex);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                ret = false;
+                ExchangeLog.LogError(string.Format("Can't get mail contacts for {0}", ou), ex);
             }
 
             ExchangeLog.LogEnd("DeleteOrganizationContacts");
@@ -1231,26 +1247,34 @@ namespace WebsitePanel.Providers.HostedSolution
             ExchangeLog.LogStart("DeleteOrganizationDistributionLists");
             bool ret = true;
 
-            Command cmd = new Command("Get-DistributionGroup");
-            cmd.Parameters.Add("OrganizationalUnit", ou);
-            cmd.Parameters.Add("RecipientTypeDetails", "MailUniversalDistributionGroup");
-            Collection<PSObject> result = ExecuteShellCommand(runSpace, cmd);
-            if (result != null && result.Count > 0)
+            try
             {
-                foreach (PSObject obj in result)
+                Command cmd = new Command("Get-DistributionGroup");
+                cmd.Parameters.Add("OrganizationalUnit", ou);
+                cmd.Parameters.Add("RecipientTypeDetails", "MailUniversalDistributionGroup");
+                Collection<PSObject> result = ExecuteShellCommand(runSpace, cmd);
+                if (result != null && result.Count > 0)
                 {
-                    string id = null;
-                    try
+                    foreach (PSObject obj in result)
                     {
-                        id = ObjToString(GetPSObjectProperty(obj, "Identity"));
-                        RemoveDistributionGroup(runSpace, id);
-                    }
-                    catch (Exception ex)
-                    {
-                        ret = false;
-                        ExchangeLog.LogError(string.Format("Can't delete distribution list {0}", id), ex);
+                        string id = null;
+                        try
+                        {
+                            id = ObjToString(GetPSObjectProperty(obj, "Identity"));
+                            RemoveDistributionGroup(runSpace, id);
+                        }
+                        catch (Exception ex)
+                        {
+                            ret = false;
+                            ExchangeLog.LogError(string.Format("Can't delete distribution list {0}", id), ex);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                ret = false;
+                ExchangeLog.LogError(string.Format("Can't get distribution lists for {0}", ou), ex);
             }
 
             ExchangeLog.LogEnd("DeleteOrganizationDistributionLists");
@@ -4797,15 +4821,18 @@ namespace WebsitePanel.Providers.HostedSolution
         private void CheckOrganizationRootFolder(Runspace runSpace, string folder, string user, string orgCanonicalName, string organizationId)
         {
             ExchangeLog.LogStart("CheckOrganizationRootFolder");
+            var mailboxName = GetPublicFolderMailboxName(organizationId);
 
-            Collection<PSObject> result = GetPublicFolderObject(runSpace, orgCanonicalName+"/"+GetPublicFolderMailboxName(organizationId), "\\" + folder, true);
+            Collection<PSObject> result = GetPublicFolderObject(runSpace, orgCanonicalName + "/" + mailboxName, "\\" + folder, true);
             if (result == null || result.Count == 0)
             {
                 ExchangeTransaction transaction = StartTransaction();
                 try
                 {
-                    string rootId = AddPublicFolder(runSpace, folder, "\\", orgCanonicalName + "/" + GetPublicFolderMailboxName(organizationId));
-                    transaction.RegisterNewPublicFolder(orgCanonicalName + "/" + GetPublicFolderMailboxName(organizationId), rootId);
+                    string rootId = AddPublicFolder(runSpace, folder, "\\", orgCanonicalName + "/" + mailboxName);
+                    transaction.RegisterNewPublicFolder(orgCanonicalName + "/" + mailboxName, rootId);
+
+                    EnableMailPublicFolderSimple(rootId);
 
                     SetPublicFolderPermissions(runSpace, rootId, user);
                 }
@@ -5004,7 +5031,6 @@ namespace WebsitePanel.Providers.HostedSolution
             PSObject obj = result[0];
         }
 
-
         private void EnableMailPublicFolderInternal(string organizationId, string folder, string accountName,
             string name, string domain)
         {
@@ -5012,14 +5038,13 @@ namespace WebsitePanel.Providers.HostedSolution
             ExchangeLog.DebugInfo("Folder: {0}", folder);
 
             Runspace runSpace = null;
+            Command cmd = null;
             try
             {
                 runSpace = OpenRunspace();
 
+                EnableMailPublicFolderSimple(folder);
 
-                Command cmd = new Command("Enable-MailPublicFolder");
-                cmd.Parameters.Add("Identity", folder);
-                ExecuteShellCommand(runSpace, cmd);
                 string id = null;
 
                 //try to avoid message: "The Active Directory proxy object for the public folder 'XXX'
@@ -5100,6 +5125,27 @@ namespace WebsitePanel.Providers.HostedSolution
                 CloseRunspace(runSpace);
             }
             ExchangeLog.LogEnd("EnableMailPublicFolderInternal");
+        }
+
+        private void EnableMailPublicFolderSimple(string folder)
+        {
+            ExchangeLog.LogStart("EnableMailPublicFolderSimple");
+            ExchangeLog.DebugInfo("Folder: {0}", folder);
+
+            Runspace runSpace = null;
+            try
+            {
+                runSpace = OpenRunspace();
+
+                Command cmd = new Command("Enable-MailPublicFolder");
+                cmd.Parameters.Add("Identity", folder);
+                ExecuteShellCommand(runSpace, cmd);
+            }
+            finally
+            {
+                CloseRunspace(runSpace);
+            }
+            ExchangeLog.LogEnd("EnableMailPublicFolderSimple");
         }
 
         private void DisableMailPublicFolderInternal(string organizationId, string folder)

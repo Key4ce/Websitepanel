@@ -15,6 +15,8 @@ using Microsoft.Search.Interop;
 using WebsitePanel.Providers.OS;
 using WebsitePanel.Providers.Utils;
 using WebsitePanel.Server.Utils;
+using System.Globalization;
+
 namespace WebsitePanel.Providers.StorageSpaces
 {
     public class Windows2012 : WebsitePanel.Providers.OS.Windows2012, IStorageSpace
@@ -188,12 +190,29 @@ namespace WebsitePanel.Providers.StorageSpaces
             try
             {
                 if (preserveInheritance == false && permissions != null)
-                {
-                    if (permissions.All(x =>!string.Equals(x.AccountName, "Domain Admins",StringComparison.InvariantCultureIgnoreCase)))
+                {                    
+                    // 06.09.2015 roland.breitschaft@x-company.de
+                    // In German the Group 'Domain-Admins' is called 'Domänen-Admins'
+                    // So we try to get the correct Group by SID
+                    var domainAdminsAsString = SecurityUtils.GetAccountNameFromSid(
+                        System.Security.Principal.WellKnownSidType.AccountDomainAdminsSid,
+                        ServerSettings);
+
+                    // Add Current User (Normally WPServer Acccount)
+                    var currentUserName = Environment.UserName;
+                    if (permissions.All(x => !string.Equals(x.AccountName, currentUserName, StringComparison.InvariantCultureIgnoreCase)))
                     {
                         permissions = permissions.Concat(new[]
                         {
-                            new UserPermission {AccountName = "Domain Admins", Read = true, Write = true}
+                            new UserPermission {AccountName = currentUserName, Read = true, Write = true}
+                        }).ToArray();
+                    }
+
+                    if (permissions.All(x =>!string.Equals(x.AccountName, domainAdminsAsString,StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        permissions = permissions.Concat(new[]
+                        {
+                            new UserPermission {AccountName = domainAdminsAsString, Read = true, Write = true}
                         }).ToArray();
                     }
 
@@ -208,7 +227,12 @@ namespace WebsitePanel.Providers.StorageSpaces
 
                 SecurityUtils.ResetNtfsPermissions(fullPath);
 
-                SecurityUtils.GrantGroupNtfsPermissions(fullPath, permissions, false, new RemoteServerSettings(), null, null,isProtected, preserveInheritance);
+                // 06.09.2015 roland.breitschaft@x-company.de
+                // Problem: Serversettings for the Method 'GrantGroupNtfsPermission' is an Default Object, but we need the real Object
+                // for the real Settings, to determine Objects from AD
+                // Fix: Give the Helper-Class SecurityUtils the real ServerSettings-Object                
+                // SecurityUtils.GrantGroupNtfsPermissions(fullPath, permissions, false, new RemoteServerSettings(), null, null, isProtected, preserveInheritance);
+                SecurityUtils.GrantGroupNtfsPermissions(fullPath, permissions, false, ServerSettings, "*", "*", isProtected, preserveInheritance);
             }
             catch (Exception ex)
             {
@@ -346,9 +370,23 @@ namespace WebsitePanel.Providers.StorageSpaces
                 Log.WriteStart("ShareFolder");
                 Log.WriteInfo("FolderPath : {0}", fullPath);
 
+                // 01.09.2015 roland.breitschaft@x-company.de 
+                // Problem: On German Systems the Accounts 'NETWORK SERVICE' and 'EVERYONE' does not exist.
+                // The equivalent in German is 'NETZWERKDIENST' for 'NETWORK SERVICE' and 'JEDER' for 'EVERYONE'
+                // FIX: To Fix this translate the SID for the Accounts into the current Language
+
+                //var scripts = new List<string>
+                //{
+                //    string.Format("net share {0}=\"{1}\" \"/grant:NETWORK SERVICE,full\" \"/grant:Everyone,full\"",shareName, fullPath)
+                //};
+
                 var scripts = new List<string>
-                {                
-                    string.Format("net share {0}=\"{1}\" \"/grant:NETWORK SERVICE,full\" \"/grant:Everyone,full\"",shareName, fullPath)
+                {
+                    string.Format(CultureInfo.InvariantCulture, "net share {0}=\"{1}\" \"/grant:{2},full\" \"/grant:{3},full\"",
+                        shareName,
+                        fullPath,
+                        SecurityUtils.GetAccountNameFromSid(System.Security.Principal.WellKnownSidType.NetworkServiceSid, ServerSettings),
+                        SecurityUtils.GetAccountNameFromSid(SystemSID.EVERYONE, ServerSettings))
                 };
 
                 object[] errors = null;
@@ -785,11 +823,24 @@ namespace WebsitePanel.Providers.StorageSpaces
 
         public Quota GetFolderQuota(string fullPath)
         {
+            Log.WriteStart("GetFolderQuota");
+            Log.WriteInfo("FullPath : {0}", fullPath);
+
             var quotas = GetQuotasForOrganization(Directory.GetParent(fullPath).ToString(), string.Empty, string.Empty);
+
+            // 05.09.2015 roland.breitschaft@x-company.de
+            // Problem: If the parent of the fullpath is Root, Quotas-Object will be null
+            // Fix: Try to get Quotas for the origin FullPath
+            if(quotas.ContainsKey(fullPath) == false)
+                quotas = GetQuotasForOrganization(fullPath, string.Empty, string.Empty);
 
             if (quotas.ContainsKey(fullPath) == false)
             {
-                return null;
+                // If Quotas is null, create an Empty-Quota Object
+                quotas = new Dictionary<string, Quota>();
+                quotas.Add(fullPath, Quota.Empty());
+
+                Log.WriteWarning("Quota not found. Use an empty Quota-Object!");
             }
 
             var quota = quotas[fullPath];
@@ -803,6 +854,8 @@ namespace WebsitePanel.Providers.StorageSpaces
 
                 quota.DiskFreeSpaceInBytes = FileUtils.GetTotalFreeSpace(Path.GetPathRoot(fullPath));
             }
+
+            Log.WriteEnd("GetFolderQuota");
 
             return quota;
         }

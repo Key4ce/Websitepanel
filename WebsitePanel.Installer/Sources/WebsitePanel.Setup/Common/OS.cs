@@ -273,21 +273,24 @@ namespace WebsitePanel.Setup
 		public enum WindowsVersion
 		{
 			Unknown = 0,
-			Windows95,
-			Windows98,
-			WindowsMe,
-			WindowsNT351,
-			WindowsNT4,
-			Windows2000,
-			WindowsXP,
-			WindowsServer2003,
-			WindowsVista,
-			WindowsServer2008,
-            Windows7,
-            WindowsServer2008R2,
-            Windows8,
-            WindowsServer2012,
-            WindowsServer2012R2
+			Windows95 = 1,
+			Windows98 = 2,
+			WindowsMe = 3,
+			WindowsNT351 = 4,
+			WindowsNT4 = 5,
+			Windows2000 = 6,
+			WindowsXP = 7,
+			WindowsServer2003 = 8,
+			WindowsVista = 9,
+			WindowsServer2008 = 10,
+            Windows7 = 11,
+            WindowsServer2008R2 = 12,
+            Windows8 = 13,
+            WindowsServer2012 = 14,
+            WindowsServer2012R2 = 15,
+
+            Win32NTWorkstation = 254, // for newer NT versions
+            Win32NTServer = 255
 		}
 
 		public static string GetName(WindowsVersion version)
@@ -342,6 +345,12 @@ namespace WebsitePanel.Setup
                     break;
                 case WindowsVersion.Windows8:
                     ret = "Windows 8";
+                    break;
+                case WindowsVersion.Win32NTWorkstation:
+                    ret = "Windows Workstation";
+                    break;
+                case WindowsVersion.Win32NTServer:
+                    ret = "Windows Server";
                     break;
                 default:
                     ret = "Windows";
@@ -450,8 +459,22 @@ namespace WebsitePanel.Setup
                                 case 3:
                                         ret = WindowsVersion.WindowsServer2012R2;
                                     break;
+                                default:
+                                    if (info.wProductType == (byte)WinPlatform.VER_NT_WORKSTATION)
+                                        ret = WindowsVersion.Win32NTWorkstation;
+                                    else
+                                        ret = WindowsVersion.Win32NTServer;
+                                    break;
                             }
                             break;
+
+                            default:
+                                if (info.wProductType == (byte)WinPlatform.VER_NT_WORKSTATION)
+                                    ret = WindowsVersion.Win32NTWorkstation;
+                                else
+                                    ret = WindowsVersion.Win32NTServer;
+                            break;
+
 					}
 					break;
 			}

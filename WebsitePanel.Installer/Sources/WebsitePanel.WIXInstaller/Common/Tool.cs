@@ -93,6 +93,8 @@ namespace WebsitePanel.WIXInstaller.Common
                 case OS.WindowsVersion.WindowsServer2012R2:
                 case OS.WindowsVersion.Windows7:
                 case OS.WindowsVersion.Windows8:
+                case OS.WindowsVersion.Win32NTWorkstation:
+                case OS.WindowsVersion.Win32NTServer:
                         Result = new[]
                         { 
                             "IIS-WebServerRole",
@@ -142,6 +144,8 @@ namespace WebsitePanel.WIXInstaller.Common
                 case OS.WindowsVersion.WindowsServer2012:
                 case OS.WindowsVersion.WindowsServer2012R2:                
                 case OS.WindowsVersion.Windows8:
+                case OS.WindowsVersion.Win32NTWorkstation:
+                case OS.WindowsVersion.Win32NTServer:                    
                         Result = new[]
                         { 
                             "IIS-ApplicationDevelopment",
@@ -169,7 +173,9 @@ namespace WebsitePanel.WIXInstaller.Common
                 case OS.WindowsVersion.WindowsServer2012R2:
                 case OS.WindowsVersion.Windows7:
                 case OS.WindowsVersion.Windows8:
-                        Result = new[] { "NetFx3" };
+                case OS.WindowsVersion.Win32NTWorkstation:
+                case OS.WindowsVersion.Win32NTServer:
+                    Result = new[] { "NetFx3" };
                     break;
             }
             return Result;
@@ -195,7 +201,9 @@ namespace WebsitePanel.WIXInstaller.Common
                 case OS.WindowsVersion.WindowsServer2012:
                 case OS.WindowsVersion.WindowsServer2012R2:                
                 case OS.WindowsVersion.Windows8:
-                        Result = InstallWebViaDismEx;
+                case OS.WindowsVersion.Win32NTWorkstation:
+                case OS.WindowsVersion.Win32NTServer:
+                    Result = InstallWebViaDismEx;
                     break;
             }
             return Result;

@@ -9,7 +9,6 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using AutoMapper;
-using log4net;
 using WebsitePanel.WebDav.Core;
 using WebsitePanel.WebDav.Core.Client;
 using WebsitePanel.WebDav.Core.Config;
@@ -51,8 +50,7 @@ namespace WebsitePanel.WebDavPortal.Controllers
         private readonly IWebDavAuthorizationService _webDavAuthorizationService;
         private readonly IUserSettingsManager _userSettingsManager;
         private readonly FileOpenerManager _openerManager;
-        private readonly ILog Log;
-
+        
         public FileSystemController(ICryptography cryptography, IWebDavManager webdavManager, IAuthenticationService authenticationService, IAccessTokenManager tokenManager, IWebDavAuthorizationService webDavAuthorizationService, FileOpenerManager openerManager, IUserSettingsManager userSettingsManager)
         {
             _cryptography = cryptography;
@@ -61,8 +59,7 @@ namespace WebsitePanel.WebDavPortal.Controllers
             _tokenManager = tokenManager;
             _webDavAuthorizationService = webDavAuthorizationService;
             _userSettingsManager = userSettingsManager;
-
-            Log = LogManager.GetLogger(this.GetType());
+                    
             _openerManager = new FileOpenerManager();
         }
 

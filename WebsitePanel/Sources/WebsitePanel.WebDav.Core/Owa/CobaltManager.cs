@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading;
 using Cobalt;
-using log4net;
 using WebsitePanel.WebDav.Core.Interfaces.Managers;
 using WebsitePanel.WebDav.Core.Interfaces.Owa;
 
@@ -13,7 +12,6 @@ namespace WebsitePanel.WebDav.Core.Owa
         private readonly IWebDavManager _webDavManager;
         private readonly IWopiFileManager _fileManager;
         private readonly IAccessTokenManager _tokenManager;
-        private readonly ILog Log;
 
         public CobaltManager(IWebDavManager webDavManager, IWopiFileManager fileManager,
             IAccessTokenManager tokenManager)
@@ -21,8 +19,6 @@ namespace WebsitePanel.WebDav.Core.Owa
             _webDavManager = webDavManager;
             _fileManager = fileManager;
             _tokenManager = tokenManager;
-
-            Log = LogManager.GetLogger(this.GetType());
         }
 
         public Atom ProcessRequest(int accessTokenId, Stream requestStream)
@@ -64,7 +60,7 @@ namespace WebsitePanel.WebDav.Core.Owa
 
             catch (Exception e)
             {
-                Log.Error("Cobalt manager Process request", e);
+                Server.Utils.Log.WriteError("Cobalt manager Process request", e);
 
                 throw;
             }

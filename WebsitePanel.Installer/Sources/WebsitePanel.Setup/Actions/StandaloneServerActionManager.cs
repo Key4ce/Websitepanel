@@ -257,7 +257,8 @@ namespace WebsitePanel.Setup.Actions
 					serviceInfo.ProviderId = 100;
 				}
                 else if (version == OS.WindowsVersion.WindowsServer2012 ||
-                    version == OS.WindowsVersion.Windows8)
+                    version == OS.WindowsVersion.Windows8 ||
+                    version == OS.WindowsVersion.WindowsServer2012R2)
                 {
                     serviceInfo.ProviderId = 104;
                 }

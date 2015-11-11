@@ -87,15 +87,38 @@ namespace WebsitePanel.Setup.Internal
                     string V = SqlUtils.GetSqlServerVersion(ConnStr);
                     var Valid = new string[] { "9.", "10.", "11.", "12." }.Any(x => V.StartsWith(x));
                     if (Valid)
+                    {
                         if (SqlUtils.GetSqlServerSecurityMode(ConnStr) == 0)
                         {
+                            var ConnBuilder = new SqlConnectionStringBuilder(ConnStr);
+                            if (ConnBuilder.IntegratedSecurity)
+                            {
+                                var SqlUser = "NT AUTHORITY\\SYSTEM";
+                                if (CheckSqlUserInAdminRole(ConnStr, out MsgStr, SqlUser))
+                                {
                             MsgBuilder.AppendLine("Good connection.");
                             Result = CheckStatuses.Success;
                         }
                         else
+                                {
+                                    MsgBuilder.AppendLine(string.Format("Usually '{0}' used when installer running under Windows Auth.\nPlease grant sysadmin rights to '{0}'.", SqlUser));
+                                    if (!string.IsNullOrWhiteSpace(MsgStr))
+                                        MsgBuilder.AppendLine(MsgStr);
+                                }
+                            }
+                            else
+                            {
+                                MsgBuilder.AppendLine("Good connection.");
+                                Result = CheckStatuses.Success;
+                            }
+                        }
+                        else
                             MsgBuilder.AppendLine("Please switch SQL Server authentication to mixed SQL Server and Windows Authentication mode.");
+                    }
                     else
+                    {
                         MsgBuilder.AppendLine("This program can be installed on SQL Server 2005/2008/2012/2014 only.");
+                }
                 }
                 else
                 {
@@ -108,6 +131,7 @@ namespace WebsitePanel.Setup.Internal
             {
                 Msg = "Unable to configure the database server." + ex.Message;
             }
+            Log.WriteInfo(Msg);
             return Result;
         }
         public static bool CheckConnectionInfo(string ConnStr, out string Info)
@@ -127,6 +151,23 @@ namespace WebsitePanel.Setup.Internal
                 }
             }
             return Result;
+        }
+        public static bool CheckSqlUserInAdminRole(string Conn, out string Msg, string User, string Role = "sysadmin")
+        {
+            var Result = 0;
+            Msg = string.Empty;
+            var query = string.Format("SELECT IS_SRVROLEMEMBER('{0}', '{1}');", Role, User);
+            try
+            {
+                var ans = SqlUtils.ExecuteQuery(Conn, query);
+                if (ans.Tables.Count == 1 && ans.Tables[0].Rows.Count == 1)
+                    int.TryParse(ans.Tables[0].Rows[0][0].ToString(), out Result);
+            }
+            catch (Exception ex)
+            {
+                Msg = ex.ToString();
+            }
+            return Result == 1;
         }
         public static bool IsAdministrator()
         {
@@ -221,6 +262,8 @@ namespace WebsitePanel.Setup.Internal
             Dst.WebSitePort = Utils.GetStringSetupParameter(Hash, Global.Parameters.WebSitePort);
             Dst.WebSiteDomain = Utils.GetStringSetupParameter(Hash, Global.Parameters.WebSiteDomain);
             Dst.UserDomain = Utils.GetStringSetupParameter(Hash, Global.Parameters.UserDomain);
+            //Dst.NewUserAccount = false; // In WiX it's always false.
+            Dst.NewUserAccount = Utils.GetStringSetupParameter(Hash, Global.Parameters.NewUserAccount) == "1";
             Dst.UserAccount = Utils.GetStringSetupParameter(Hash, Global.Parameters.UserAccount);
             Dst.UserPassword = Utils.GetStringSetupParameter(Hash, Global.Parameters.UserPassword);
 
@@ -3496,6 +3539,7 @@ namespace WebsitePanel.Setup.Internal
 
             try
             {
+                if(Context.NewUserAccount)
                 CreateUserAccount(userDomain, userName, password, userDescription, memberOf);
                 if (!string.IsNullOrEmpty(userDomain))
                 {
@@ -3752,6 +3796,7 @@ namespace WebsitePanel.Setup.Internal
 
             try
             {
+                if (Context.NewUserAccount)
                 CreateUserAccount(userDomain, userName, password, userDescription, memberOf);
             }
             catch (Exception ex)

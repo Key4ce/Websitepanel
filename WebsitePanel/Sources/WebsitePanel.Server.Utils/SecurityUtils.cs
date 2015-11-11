@@ -40,7 +40,7 @@ using System.Security.Principal;
 
 using WebsitePanel.Providers.OS;
 using WebsitePanel.Server.Utils;
-
+using System.DirectoryServices.ActiveDirectory;
 
 namespace WebsitePanel.Providers.Utils
 {
@@ -157,14 +157,42 @@ namespace WebsitePanel.Providers.Utils
             // get all explicit rules
             AuthorizationRuleCollection rules = security.GetAccessRules(true, true, typeof(SecurityIdentifier));
 
+            // 06.09.2015 roland.breitschaft@x-company.de
+            // Determine the correct AccountName by SID
+            // 04.10.2015 roland.breitschaft@x-company.de
+            // For Performance Reason put this outside of foreach
+            var networkServiceName = GetAccountNameFromSid(WellKnownSidType.NetworkServiceSid, serverSettings);
+            var systemName = GetAccountNameFromSid(WellKnownSidType.LocalSystemSid, serverSettings);
+            var currentUserName = Environment.UserName;
+
             // iterate through each account
             foreach (UserPermission permission in users)
             {
                 SecurityIdentifier identity = null;
-                if (String.Compare(permission.AccountName, "network service", true) == 0)
+
+                if (String.Compare(permission.AccountName, networkServiceName, true) == 0
+                    || string.Compare(permission.AccountName, "NETWORK SERVICE", true) == 0)
                     identity = new SecurityIdentifier(SystemSID.NETWORK_SERVICE);
+                else if (String.Compare(permission.AccountName, systemName, true) == 0)
+                    identity = new SecurityIdentifier(SystemSID.SYSTEM);
                 else
-                    identity = new SecurityIdentifier(GetAccountSid(permission.AccountName, serverSettings, usersOU, groupsOU));
+                {
+                    // 04.10.2015 roland.breitschaft@x-company.de
+                    // Check, if AD is enabled
+                    string sid = null;
+                    if (String.Compare(permission.AccountName, currentUserName, true) == 0)
+                        sid = GetAccountSid(currentUserName, serverSettings, null, null);
+                    else
+                    {
+                        if (serverSettings.ADEnabled)
+                            sid = GetAccountSid(permission.AccountName, serverSettings, usersOU, groupsOU);
+                        else
+                            sid = GetAccountSid(permission.AccountName, serverSettings, null, null);
+                    }
+
+                    if(!string.IsNullOrEmpty(sid))
+                        identity = new SecurityIdentifier(sid);
+                }
 
                 foreach (FileSystemAccessRule rule in rules)
                 {
@@ -192,14 +220,42 @@ namespace WebsitePanel.Providers.Utils
             if (security == null)
                 return;
 
+            // 06.09.2015 roland.breitschaft@x-company.de
+            // Determine the correct AccountName by SID
+            // 04.10.2015 roland.breitschaft@x-company.de
+            // For Performance Reason put this outside of foreach
+            var networkServiceName = GetAccountNameFromSid(WellKnownSidType.NetworkServiceSid, serverSettings);
+            var systemName = GetAccountNameFromSid(WellKnownSidType.LocalSystemSid, serverSettings);
+            var currentUserName = Environment.UserName;
+
             // iterate through each account
             foreach (UserPermission permission in users)
             {
                 SecurityIdentifier identity = null;
-                if (String.Compare(permission.AccountName, "network service", true) == 0)
+
+                if (String.Compare(permission.AccountName, networkServiceName, true) == 0
+                    || string.Compare(permission.AccountName, "NETWORK SERVICE", true) == 0)
                     identity = new SecurityIdentifier(SystemSID.NETWORK_SERVICE);
+                else if (String.Compare(permission.AccountName, systemName, true) == 0)
+                    identity = new SecurityIdentifier(SystemSID.SYSTEM);
                 else
-                    identity = new SecurityIdentifier(GetAccountSid(permission.AccountName, serverSettings, usersOU, groupsOU));
+                {
+                    // 04.10.2015 roland.breitschaft@x-company.de
+                    // Check, if AD is enabled
+                    string sid = null;
+                    if (String.Compare(permission.AccountName, currentUserName, true) == 0)
+                        sid = GetAccountSid(currentUserName, serverSettings, null, null);
+                    else
+                    {
+                        if (serverSettings.ADEnabled)
+                            sid = GetAccountSid(permission.AccountName, serverSettings, usersOU, groupsOU);
+                        else
+                            sid = GetAccountSid(permission.AccountName, serverSettings, null, null);
+                    }
+
+                    if (!string.IsNullOrEmpty(sid))
+                        identity = new SecurityIdentifier(sid);
+                }
 
                 // remove explicit permissions
                 security.RemoveAccessRuleAll(new FileSystemAccessRule(identity,
@@ -933,6 +989,97 @@ namespace WebsitePanel.Providers.Utils
 
                 return sid;
             }
+        }
+
+        public static string GetAccountNameFromSid(string sid, RemoteServerSettings serverSettings)
+        {
+            Log.WriteStart("GetAccountNameFromSid");
+
+            SecurityIdentifier ident = new SecurityIdentifier(sid);
+
+            var accountName = GetAccountNameFromSidInternal(ident, serverSettings);
+
+            Log.WriteEnd("GetAccountNameFromSid");
+
+            return accountName;
+        }
+
+
+        /// <summary>
+        /// Gets from an given SID the corresponding Accountname
+        /// </summary>
+        /// <param name="sid">The SID of the Account</param>
+        /// <param name="domainSid">The SID of the Domain User</param>
+        /// <returns>An System- or Useraccount Name.</returns>
+        public static string GetAccountNameFromSid(WellKnownSidType sid, RemoteServerSettings serverSettings)
+        {
+            Log.WriteStart("GetAccountNameFromSid");
+
+            SecurityIdentifier ident = null;
+
+            if (sid == WellKnownSidType.AccountAdministratorSid
+                || sid == WellKnownSidType.AccountGuestSid
+                || sid == WellKnownSidType.AccountKrbtgtSid
+                || sid == WellKnownSidType.AccountDomainAdminsSid
+                || sid == WellKnownSidType.AccountDomainUsersSid
+                || sid == WellKnownSidType.AccountDomainGuestsSid
+                || sid == WellKnownSidType.AccountComputersSid
+                || sid == WellKnownSidType.AccountControllersSid
+                || sid == WellKnownSidType.AccountCertAdminsSid
+                || sid == WellKnownSidType.AccountSchemaAdminsSid
+                || sid == WellKnownSidType.AccountEnterpriseAdminsSid
+                || sid == WellKnownSidType.AccountPolicyAdminsSid
+                || sid == WellKnownSidType.AccountRasAndIasServersSid)
+            {
+                if (serverSettings.ADEnabled)
+                {
+                    // Determine Domains SID
+                    SecurityIdentifier domainSid = null;
+                    var domainName = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().DomainName;
+                    var domain = Domain.GetDomain(new DirectoryContext(DirectoryContextType.Domain, domainName, serverSettings.ADUsername, serverSettings.ADPassword));
+
+                    using (DirectoryEntry de = domain.GetDirectoryEntry())
+                    {
+                        byte[] domainSIdArray = (byte[])de.Properties["objectSid"].Value;
+                        domainSid = new SecurityIdentifier(domainSIdArray, 0);
+                    }
+
+                    ident = new SecurityIdentifier(sid, domainSid);
+                }
+                else
+                {
+                    Log.WriteError("Please enable AD Auth for this Server. Thanks", new SecurityException("AD Auth missing"));
+                }
+            }
+            else
+            {
+                ident = new SecurityIdentifier(sid, null);
+            }
+
+            var accountName = GetAccountNameFromSidInternal(ident, serverSettings);
+
+            Log.WriteEnd("GetAccountNameFromSid");
+
+            return accountName;
+        }
+
+        private static string GetAccountNameFromSidInternal(SecurityIdentifier ident, RemoteServerSettings serverSettings)
+        {
+            string accountName = string.Empty;
+
+            Log.WriteStart("GetAccountNameFromSidInternal");
+
+            if (ident != null)
+                accountName = ident.Translate(typeof(NTAccount)).ToString();
+
+            if (!string.IsNullOrEmpty(accountName))
+                accountName = GetUserName(accountName, serverSettings);
+            else
+                Log.WriteError("Accountname could not determined", new SecurityException());
+
+            Log.WriteEnd("GetAccountNameFromSidInternal");
+
+            return accountName;
         }
 
         private static string[] GetUserGroups(DirectoryEntry objUser)
@@ -1685,6 +1832,28 @@ namespace WebsitePanel.Providers.Utils
 
         private static void AppendProviderPath(StringBuilder sb, RemoteServerSettings serverSettings)
         {
+            // 06.09.2015 roland.breitschaft@x-company.de
+            // If AD is enabled, it will add the correct DomainControllerName to the LDAP String
+            var domainControllerName = string.Empty;
+
+            if (serverSettings.ADEnabled)
+            {
+                var domainName = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().DomainName;
+
+                if (!string.IsNullOrEmpty(domainName))
+                {
+                    var domain = Domain.GetDomain(new DirectoryContext(DirectoryContextType.Domain, domainName, serverSettings.ADUsername, serverSettings.ADPassword));
+
+                    if (domain != null && domain.DomainControllers.Count > 0)
+                    {
+                        var domainController = domain.DomainControllers[0];
+                        domainControllerName = domainController.Name;
+                        sb.AppendFormat("LDAP://{0}/", domainControllerName);
+                        return;
+                    }
+                }
+            }
+
             sb.Append("LDAP://");
         }
 
@@ -1693,6 +1862,10 @@ namespace WebsitePanel.Providers.Utils
             // append OU location
             if (String.IsNullOrEmpty(usersOU))
                 sb.Append("CN=Users,"); // default user accounts location
+            // 06.09.2015 roland.breitschaft@x-company.de
+            // if usersOU is '*' the search will accross over the complet AD-Domain
+            else if (string.Compare(usersOU, "*") == 0)
+                return;
             else
                 AppendOUPath(sb, usersOU);
         }
@@ -1702,6 +1875,10 @@ namespace WebsitePanel.Providers.Utils
             // append OU location
             if (String.IsNullOrEmpty(groupsOU))
                 sb.Append("CN=Users,"); // default user accounts location
+            // 06.09.2015 roland.breitschaft@x-company.de
+            // if groupsOU is '*' the search will accross over the complet AD-Domain
+            else if (string.Compare(groupsOU, "*") == 0)
+                return;
             else
                 AppendOUPath(sb, groupsOU);
         }

@@ -50,7 +50,11 @@ namespace WebsitePanel.Providers.Web
 
         public bool IsEmpty()
         {
-            return string.IsNullOrEmpty(LocationDrive) && string.IsNullOrEmpty(HomeFolder) && string.IsNullOrEmpty(Domain);
+            // 06.09.2015 roland.breitschaft@x-company.de
+            // Problem: Object returns the wrong Empty-State
+            // Fix: Make an Validation with 'or'
+            //return string.IsNullOrEmpty(LocationDrive) && string.IsNullOrEmpty(HomeFolder) && string.IsNullOrEmpty(Domain);
+            return string.IsNullOrEmpty(LocationDrive) || string.IsNullOrEmpty(HomeFolder) || string.IsNullOrEmpty(Domain);
         }
     }
 }

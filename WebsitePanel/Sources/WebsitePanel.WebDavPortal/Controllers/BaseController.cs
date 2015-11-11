@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using WebsitePanel.Server.Utils;
 using WebsitePanel.WebDavPortal.Models.Common;
 using WebsitePanel.WebDavPortal.Models.Common.Enums;
 
@@ -14,6 +15,8 @@ namespace WebsitePanel.WebDavPortal.Controllers
 
         public void AddMessage(MessageType type, string value)
         {
+            Log.WriteStart("AddMessage");
+
             var messages = TempData[MessagesKey] as List<Message>;
 
             if (messages == null)
@@ -28,6 +31,8 @@ namespace WebsitePanel.WebDavPortal.Controllers
             });
 
             TempData[MessagesKey] = messages;
+
+            Log.WriteEnd("AddMessage");
         }
     }
 }

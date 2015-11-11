@@ -6,7 +6,7 @@
     <?include Config.Wxi?>
     <Product Id="*" Name="$(var.NAME)" Language="1033" Version="$(var.VERSION)" Manufacturer="$(var.MANUFACTURER)"
              UpgradeCode="F59D3AED-C1B8-46B4-AFE2-A97F3B7DFB5E">
-        <Package  InstallerVersion="200" Compressed="yes" InstallPrivileges="elevated" InstallScope="perMachine" Description="$(var.NAME) $(var.VERSION)" Comments="$(var.DESCRIPTION)" />
+        <Package  InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Description="$(var.NAME) $(var.VERSION)" Comments="$(var.DESCRIPTION)" />
         <Media Id="1" EmbedCab="yes" Cabinet="websitepanel_cab" />
         <!-- Use WIX_UPGRADE_DETECTED -->
         <MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed."  AllowSameVersionUpgrades="yes" />
@@ -82,21 +82,34 @@
                 <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
                 <Control Id="Description" Type="Text" X="20" Y="23" Width="280" Height="20" Transparent="yes" NoPrefix="yes" Text="Specify WebsitePanel Server security settings." />
                 <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Security Settings" />
-                <Control Type="Text" Id="DomainLabel" Width="73" Height="15" X="58" Y="116" Text="Domain:" />
-                <Control Type="ComboBox" Id="ServerDomainCombo" Width="163" Height="15" X="142" Y="116" Property="PI_SERVER_DOMAIN">
-                    <ComboBox Property="PI_SERVER_DOMAIN" />
-                    <Condition Action="disable">NOT(PI_SERVER_CREATE_AD = "1")</Condition>
-                    <Condition Action="enable">PI_SERVER_CREATE_AD = "1"</Condition>
+                <Control Type="ComboBox" Property="PI_SERVER_CREATENEWACCOUNT" Id="ServerCreateNewAccountCombo" Width="163" Height="16" X="142" Y="90" ComboList="yes" Sorted="yes">
+                  <ComboBox Property="PI_SERVER_CREATENEWACCOUNT">
+                    <ListItem Text="Create new account" Value="1"/>
+                    <ListItem Text="Choose existing account" Value="2"/>
+                  </ComboBox>
                 </Control>
-                <Control Type="Text" Id="UserLabel" Width="73" Height="15" X="58" Y="142" Text="User Name:" />
-                <Control Type="Edit" Id="LoginEdit" X="142" Y="142" Width="163" Height="15" Property="PI_SERVER_LOGIN" />
-                <Control Type="Text" Id="PasswordLabel" Width="73" Height="15" X="58" Y="169" Text="Password:" />
-                <Control Type="Edit" Id="PasswordEdit" Width="163" Height="15" X="142" Y="169" Property="PI_SERVER_PASSWORD" Password="yes" />
-                <Control Type="Text" Id="ConfirmPasswordLabel" Width="73" Height="15" X="58" Y="195" Text="Confirm Password:" />
-                <Control Type="Edit" Id="ConfirmPasswordEdit" Width="163" Height="15" X="142" Y="195" Property="PI_SERVER_PASSWORD_CONFIRM" Password="yes" />
-                <Control Type="Text" Id="IntroLabel" Width="341" Height="30" X="15" Y="62" Text="Please specify a new Windows user account for the web site anonymous access and application pool identity." />
-                <Control Type="CheckBox" Id="CreateADAccountCheckBox" Width="202" Height="17" X="58" Y="90" Text="Create Active Directory account" Property="PI_SERVER_CREATE_AD" CheckBoxValue="1" />
-                <Control Type="PushButton" Id="SelectUserButton" X="305" Y="142" Width="15" Height="15" Text="..." />
+                <Control Type="CheckBox" Id="ServerCreateADAccountChekBox" Property="PI_SERVER_CREATEADACCOUNT" Width="163" Height="15" X="142" Y="110"
+                         CheckBoxValue="1" Text="Create Active directory account">
+                  <Condition Action="show">PI_SERVER_CREATENEWACCOUNT=1</Condition>
+                  <Condition Action="hide">PI_SERVER_CREATENEWACCOUNT=2</Condition>
+                </Control>
+                <Control Type="Text" Id="DomainLabel" Width="73" Height="15" X="58" Y="130" Text="Domain:" />
+                <Control Type="ComboBox" Id="ServerDomainCombo" Width="163" Height="15" X="142" Y="130" Property="PI_SERVER_DOMAIN">
+                  <ComboBox Property="PI_SERVER_DOMAIN" />
+                  <Condition Action="enable">PI_SERVER_CREATEADACCOUNT=1</Condition>
+                  <Condition Action="disable">NOT(PI_SERVER_CREATEADACCOUNT=1)</Condition>
+                </Control>
+                <Control Type="Text" Id="UserLabel" Width="73" Height="15" X="58" Y="150" Text="User Name:" />
+                <Control Type="Edit" Id="LoginEdit" X="142" Y="150" Width="163" Height="15" Property="PI_SERVER_LOGIN" />
+                <Control Type="Text" Id="PasswordLabel" Width="73" Height="15" X="58" Y="170" Text="Password:" />
+                <Control Type="Edit" Id="PasswordEdit" Width="163" Height="15" X="142" Y="170" Property="PI_SERVER_PASSWORD" Password="yes" />
+                <Control Type="Text" Id="ConfirmPasswordLabel" Width="73" Height="15" X="58" Y="190" Text="Confirm Password:" />
+                <Control Type="Edit" Id="ConfirmPasswordEdit" Width="163" Height="15" X="142" Y="190" Property="PI_SERVER_PASSWORD_CONFIRM" Password="yes" />
+                <Control Type="Text" Id="IntroLabel" Width="341" Height="30" X="15" Y="52" Text="Please specify a new Windows user account for the web site anonymous access and application pool identity." />
+                <Control Type="PushButton" Id="SelectUserButton" X="305" Y="150" Width="15" Height="15" Text="...">
+                  <Condition Action="show">PI_SERVER_CREATENEWACCOUNT=2</Condition>
+                  <Condition Action="hide">PI_SERVER_CREATENEWACCOUNT=1</Condition>
+                </Control>
             </Dialog>
             <Dialog Id="ServerPasswordDlg" Width="370" Height="270" NoMinimize="yes" Title="[ProductName] Setup">
                 <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="Back" />
@@ -143,21 +156,34 @@
                 <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
                 <Control Id="Description" Type="Text" X="20" Y="23" Width="280" Height="20" Transparent="yes" NoPrefix="yes" Text="Specify WebsitePanel Enterprise Server security settings." />
                 <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Security Settings" />
-                <Control Type="Text" Id="DomainLabel" Width="73" Height="15" X="58" Y="116" Text="Domain:" />
-                <Control Type="ComboBox" Id="EServerDomainCombo" Width="163" Height="15" X="142" Y="116" Property="PI_ESERVER_DOMAIN">
-                    <ComboBox Property="PI_ESERVER_DOMAIN" />
-                    <Condition Action="disable">NOT(PI_ESERVER_CREATE_AD = "1")</Condition>
-                    <Condition Action="enable">PI_ESERVER_CREATE_AD = "1"</Condition>
+                <Control Type="ComboBox" Property="PI_ESERVER_CREATENEWACCOUNT" Id="EServerCreateNewAccountCombo" Width="163" Height="16" X="142" Y="90" ComboList="yes" Sorted="yes">
+                  <ComboBox Property="PI_ESERVER_CREATENEWACCOUNT">
+                    <ListItem Text="Create new account" Value="1"/>
+                    <ListItem Text="Choose existing account" Value="2"/>
+                  </ComboBox>
                 </Control>
-                <Control Type="Text" Id="UserLabel" Width="73" Height="15" X="58" Y="142" Text="User Name:" />
-                <Control Type="Edit" Id="LoginEdit" Width="163" Height="15" X="142" Y="142" Property="PI_ESERVER_LOGIN"/>
-                <Control Type="Text" Id="PasswordLabel" Width="73" Height="15" X="58" Y="169" Text="Password:" />
-                <Control Type="Edit" Id="PasswordEdit" Width="163" Height="15" X="142" Y="169" Property="PI_ESERVER_PASSWORD" Password="yes"/>
-                <Control Type="Text" Id="ConfirmPasswordLabel" Width="73" Height="15" X="58" Y="195" Text="Confirm Password:" />
-                <Control Type="Edit" Id="ConfirmPasswordEdit" Width="163" Height="15" X="142" Y="195" Property="PI_ESERVER_PASSWORD_CONFIRM" Password="yes"/>
-                <Control Type="Text" Id="IntroLabel" Width="341" Height="30" X="15" Y="62" Text="Please specify a new Windows user account for the web site anonymous access and application pool identity." />
-                <Control Type="CheckBox" Id="CreateADAccountCheckBox" Width="202" Height="17" X="58" Y="90" Text="Create Active Directory account" Property="PI_ESERVER_CREATE_AD"  CheckBoxValue="1"/>
-                <Control Type="PushButton" Id="SelectUserButton" X="305" Y="142" Width="15" Height="15" Text="..." />
+                <Control Type="CheckBox" Id="EServerCreateADAccountChekBox" Property="PI_ESERVER_CREATEADACCOUNT" Width="163" Height="15" X="142" Y="110"
+                         CheckBoxValue="1" Text="Create Active directory account">
+                  <Condition Action="show">PI_ESERVER_CREATENEWACCOUNT=1</Condition>
+                  <Condition Action="hide">PI_ESERVER_CREATENEWACCOUNT=2</Condition>
+                </Control>
+                <Control Type="Text" Id="DomainLabel" Width="73" Height="15" X="58" Y="130" Text="Domain:" />
+                <Control Type="ComboBox" Id="EServerDomainCombo" Width="163" Height="15" X="142" Y="130" Property="PI_ESERVER_DOMAIN">
+                  <ComboBox Property="PI_ESERVER_DOMAIN" />
+                  <Condition Action="enable">PI_ESERVER_CREATEADACCOUNT=1</Condition>
+                  <Condition Action="disable">NOT(PI_ESERVER_CREATEADACCOUNT=1)</Condition>
+                </Control>
+                <Control Type="Text" Id="UserLabel" Width="73" Height="15" X="58" Y="150" Text="User Name:" />
+                <Control Type="Edit" Id="LoginEdit" Width="163" Height="15" X="142" Y="150" Property="PI_ESERVER_LOGIN"/>
+                <Control Type="Text" Id="PasswordLabel" Width="73" Height="15" X="58" Y="170" Text="Password:" />
+                <Control Type="Edit" Id="PasswordEdit" Width="163" Height="15" X="142" Y="170" Property="PI_ESERVER_PASSWORD" Password="yes"/>
+                <Control Type="Text" Id="ConfirmPasswordLabel" Width="73" Height="15" X="58" Y="190" Text="Confirm Password:" />
+                <Control Type="Edit" Id="ConfirmPasswordEdit" Width="163" Height="15" X="142" Y="190" Property="PI_ESERVER_PASSWORD_CONFIRM" Password="yes"/>
+                <Control Type="Text" Id="IntroLabel" Width="341" Height="30" X="15" Y="52" Text="Please specify a new Windows user account for the web site anonymous access and application pool identity." />
+                <Control Type="PushButton" Id="SelectUserButton" X="305" Y="150" Width="15" Height="15" Text="...">
+                  <Condition Action="show">PI_ESERVER_CREATENEWACCOUNT=2</Condition>
+                  <Condition Action="hide">PI_ESERVER_CREATENEWACCOUNT=1</Condition>
+                </Control>
             </Dialog>
             <Dialog Id="ServerAdminPasswordDlg" Width="370" Height="270" NoMinimize="yes" Title="[ProductName] Setup">
                 <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="Back" />
@@ -262,22 +288,35 @@
                 <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
                 <Control Id="Description" Type="Text" X="20" Y="23" Width="280" Height="20" Transparent="yes" NoPrefix="yes" Text="Specify WebsitePanel Portal security settings." />
                 <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Security Settings" />
-                <Control Type="Text" Id="DomainLabel" Width="73" Height="15" X="58" Y="116" Text="Domain:" />
-                <Control Type="ComboBox" Id="PortalDomainCombo" Width="163" Height="15" X="142" Y="116" Property="PI_PORTAL_DOMAIN">
-                    <ComboBox Property="PI_PORTAL_DOMAIN" />
-                    <Condition Action="disable">NOT(PI_PORTAL_CREATE_AD = "1")</Condition>
-                    <Condition Action="enable">PI_PORTAL_CREATE_AD = "1"</Condition>
+                <Control Type="ComboBox" Property="PI_PORTAL_CREATENEWACCOUNT" Id="PortalCreateNewAccountCombo" Width="163" Height="16" X="142" Y="90" ComboList="yes" Sorted="yes">
+                  <ComboBox Property="PI_PORTAL_CREATENEWACCOUNT">
+                    <ListItem Text="Create new account" Value="1"/>
+                    <ListItem Text="Choose existing account" Value="2"/>
+                  </ComboBox>
                 </Control>
-                <Control Type="Text" Id="UserLabel" Width="73" Height="15" X="58" Y="142" Text="User Name:" />
-                <Control Type="Edit" Id="LoginEdit" Width="163" Height="15" X="142" Y="142" Property="PI_PORTAL_LOGIN"/>
-                <Control Type="Text" Id="PasswordLabel" Width="73" Height="15" X="58" Y="169" Text="Password:" />
-                <Control Type="Edit" Id="PasswordEdit" Width="163" Height="15" X="142" Y="169" Property="PI_PORTAL_PASSWORD" Password="yes"/>
-                <Control Type="Text" Id="ConfirmPasswordLabel" Width="73" Height="15" X="58" Y="195" Text="Confirm Password:" />
-                <Control Type="Edit" Id="ConfirmPasswordEdit" Width="163" Height="15" X="142" Y="195" Property="PI_PORTAL_PASSWORD_CONFIRM" Password="yes"/>
-                <Control Type="Text" Id="IntroLabel" Width="341" Height="30" X="15" Y="62" Text="Please specify a new Windows user account for the web site anonymous access and application pool identity." />
-                <Control Type="CheckBox" Id="CreateADAccountCheckBox" Width="202" Height="17" X="58" Y="90" Text="Create Active Directory account" Property="PI_PORTAL_CREATE_AD" CheckBoxValue="1" />
-                <Control Type="PushButton" Id="SelectUserButton" X="305" Y="142" Width="15" Height="15" Text="..." />
-            </Dialog>
+                <Control Type="CheckBox" Id="PortalCreateADAccountChekBox" Property="PI_PORTAL_CREATEADACCOUNT" Width="163" Height="15" X="142" Y="110"
+                         CheckBoxValue="1" Text="Create Active directory account">
+                  <Condition Action="show">PI_PORTAL_CREATENEWACCOUNT=1</Condition>
+                  <Condition Action="hide">PI_PORTAL_CREATENEWACCOUNT=2</Condition>
+                </Control>              
+                  <Control Type="Text" Id="DomainLabel" Width="73" Height="15" X="58" Y="130" Text="Domain:" />
+                  <Control Type="ComboBox" Id="PortalDomainCombo" Width="163" Height="15" X="142" Y="130" Property="PI_PORTAL_DOMAIN">
+                      <ComboBox Property="PI_PORTAL_DOMAIN" />
+                      <Condition Action="enable">PI_PORTAL_CREATEADACCOUNT=1</Condition>
+                      <Condition Action="disable">NOT(PI_PORTAL_CREATEADACCOUNT=1)</Condition>
+                  </Control>
+                  <Control Type="Text" Id="UserLabel" Width="73" Height="15" X="58" Y="150" Text="User Name:" />
+                  <Control Type="Edit" Id="LoginEdit" Width="163" Height="15" X="142" Y="150" Property="PI_PORTAL_LOGIN"/>
+                  <Control Type="Text" Id="PasswordLabel" Width="73" Height="15" X="58" Y="170" Text="Password:" />
+                  <Control Type="Edit" Id="PasswordEdit" Width="163" Height="15" X="142" Y="170" Property="PI_PORTAL_PASSWORD" Password="yes"/>
+                  <Control Type="Text" Id="ConfirmPasswordLabel" Width="73" Height="15" X="58" Y="190" Text="Confirm Password:" />
+                  <Control Type="Edit" Id="ConfirmPasswordEdit" Width="163" Height="15" X="142" Y="190" Property="PI_PORTAL_PASSWORD_CONFIRM" Password="yes"/>
+                  <Control Type="Text" Id="IntroLabel" Width="341" Height="30" X="15" Y="52" Text="Please specify a new Windows user account for the web site anonymous access and application pool identity." />
+                  <Control Type="PushButton" Id="SelectUserButton" X="305" Y="150" Width="15" Height="15" Text="...">
+                    <Condition Action="show">PI_PORTAL_CREATENEWACCOUNT=2</Condition>
+                    <Condition Action="hide">PI_PORTAL_CREATENEWACCOUNT=1</Condition>
+                  </Control>
+              </Dialog>
             <Dialog Id="ESUrlDlg" Width="370" Height="270" NoMinimize="yes" Title="[ProductName] Setup">
                 <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="Back" />
                 <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="Next" />
@@ -492,6 +531,8 @@
             <Publish Dialog="SUserAccountDlg" Control="SelectUserButton" Property="DSOP_DOWNLEVEL_SCOPE_FILTER_FLAGS" Value="DSOP_DOWNLEVEL_FILTER_USERS" Order="1">1</Publish>
             <Publish Dialog="SUserAccountDlg" Control="SelectUserButton" Property="PI_SERVER_LOGIN" Value="[DSOP_UPN]" Order="3"><![CDATA[DSOP_UPN <> ""]]></Publish>
             <Publish Dialog="SUserAccountDlg" Control="SelectUserButton" Property="PI_SERVER_LOGIN" Value="[DSOP_NAME]" Order="3"><![CDATA[DSOP_NAME <> "" AND DSOP_UPN = ""]]></Publish>
+            <Publish Dialog="SUserAccountDlg" Control="SelectUserButton" Event="DoAction" Value="CA_ServerNormalizeLoginUI" Order="4">1</Publish>
+            <Publish Dialog="SUserAccountDlg" Control="SelectUserButton" Property="PI_SERVER_LOGIN" Value="[PI_SERVER_LOGIN]" Order="5">1</Publish>
             <!--ServerPasswordDlg-->
             <Publish Dialog="ServerPasswordDlg" Control="Back" Event="NewDialog" Value="SUserAccountDlg" Order="1">1</Publish>
             <Publish Dialog="ServerPasswordDlg" Control="Next" Event="NewDialog" Value="ESWebDlg" Order="8"><![CDATA[&EnterpriseServerFeature=3 AND COMPFOUND_ESERVER=0 AND VALIDATE_OK = "1"]]></Publish>
@@ -524,6 +565,8 @@
             <Publish Dialog="ESUserAccountDlg" Control="SelectUserButton" Property="DSOP_DOWNLEVEL_SCOPE_FILTER_FLAGS" Value="DSOP_DOWNLEVEL_FILTER_USERS" Order="1">1</Publish>
             <Publish Dialog="ESUserAccountDlg" Control="SelectUserButton" Property="PI_ESERVER_LOGIN" Value="[DSOP_UPN]" Order="3"><![CDATA[DSOP_UPN <> ""]]></Publish>
             <Publish Dialog="ESUserAccountDlg" Control="SelectUserButton" Property="PI_ESERVER_LOGIN" Value="[DSOP_NAME]" Order="3"><![CDATA[DSOP_NAME <> "" AND DSOP_UPN = ""]]></Publish>
+            <Publish Dialog="ESUserAccountDlg" Control="SelectUserButton" Event="DoAction" Value="CA_EServerNormalizeLoginUI" Order="4">1</Publish>
+            <Publish Dialog="ESUserAccountDlg" Control="SelectUserButton" Property="PI_ESERVER_LOGIN" Value="[PI_ESERVER_LOGIN]" Order="5">1</Publish>            
             <!--ServerAdminPasswordDlg-->
             <Publish Dialog="ServerAdminPasswordDlg" Control="Back" Event="NewDialog" Value="ESUserAccountDlg" Order="1">1</Publish>
             <Publish Dialog="ServerAdminPasswordDlg" Control="Next" Event="NewDialog" Value="DatabaseConnectionDlg" Order="3"><![CDATA[VALIDATE_OK="1"]]></Publish>
@@ -575,6 +618,8 @@
             <Publish Dialog="PUserAccountDlg" Control="SelectUserButton" Property="DSOP_DOWNLEVEL_SCOPE_FILTER_FLAGS" Value="DSOP_DOWNLEVEL_FILTER_USERS" Order="1">1</Publish>
             <Publish Dialog="PUserAccountDlg" Control="SelectUserButton" Property="PI_PORTAL_LOGIN" Value="[DSOP_UPN]" Order="3"><![CDATA[DSOP_UPN <> ""]]></Publish>
             <Publish Dialog="PUserAccountDlg" Control="SelectUserButton" Property="PI_PORTAL_LOGIN" Value="[DSOP_NAME]" Order="3"><![CDATA[DSOP_NAME <> "" AND DSOP_UPN = ""]]></Publish>
+            <Publish Dialog="PUserAccountDlg" Control="SelectUserButton" Event="DoAction" Value="CA_PortalNormalizeLoginUI" Order="4">1</Publish>
+            <Publish Dialog="PUserAccountDlg" Control="SelectUserButton" Property="PI_PORTAL_LOGIN" Value="[PI_PORTAL_LOGIN]" Order="5">1</Publish>            
             <!--ESUrlDlg-->
             <Publish Dialog="ESUrlDlg" Control="Back" Event="NewDialog" Value="PUserAccountDlg" Order="1"><![CDATA[&PortalFeature=3 AND COMPFOUND_PORTAL="0"]]></Publish>
             <Publish Dialog="ESUrlDlg" Control="Next" Event="NewDialog" Value="SchedulerDlg" Order="4"><![CDATA[&SchedulerServiceFeature=3 AND COMPFOUND_SCHEDULER="0" AND NOT(&EnterpriseServerFeature=3 OR !EnterpriseServerFeature=3)]]></Publish>
@@ -709,20 +754,18 @@
         <Property Id="PI_SERVER_IP" Secure="yes" Value="127.0.0.1" />
         <Property Id="PI_SERVER_PORT" Secure="yes" Value="9003" />
         <Property Id="PI_SERVER_HOST" Secure="yes" />
-        <Property Id="PI_SERVER_LOGIN" Secure="yes" Value="WPServer"/>
+        <Property Id="PI_SERVER_LOGIN" Secure="yes" />
         <Property Id="PI_SERVER_PASSWORD" Secure="yes" />
         <Property Id="PI_SERVER_PASSWORD_CONFIRM" Secure="yes" />
         <Property Id="PI_SERVER_DOMAIN" Secure="yes" />
-        <Property Id="PI_SERVER_CREATE_AD" Secure="yes" />
 
         <Property Id="PI_ESERVER_IP" Secure="yes" Value="127.0.0.1" />
         <Property Id="PI_ESERVER_PORT" Secure="yes" Value="9002" />
         <Property Id="PI_ESERVER_HOST" Secure="yes" />
-        <Property Id="PI_ESERVER_LOGIN" Secure="yes"  Value="WPEnterpriseServer"/>
+        <Property Id="PI_ESERVER_LOGIN" Secure="yes" />
         <Property Id="PI_ESERVER_PASSWORD" Secure="yes" />
         <Property Id="PI_ESERVER_PASSWORD_CONFIRM" Secure="yes" />
         <Property Id="PI_ESERVER_DOMAIN" Secure="yes" />
-        <Property Id="PI_ESERVER_CREATE_AD" Secure="yes" />
         <Property Id="PI_ESERVER_URL" Secure="yes" />
         <Property Id="PI_ESERVER_CONN_STR" Secure="yes" />
         <Property Id="PI_ESERVER_CRYPTO_KEY" Secure="yes" />
@@ -730,11 +773,17 @@
         <Property Id="PI_PORTAL_IP" Secure="yes" Value="127.0.0.1" />
         <Property Id="PI_PORTAL_PORT" Secure="yes" Value="9001" />
         <Property Id="PI_PORTAL_HOST" Secure="yes" />
-        <Property Id="PI_PORTAL_LOGIN" Secure="yes" Value="WPPortal" />
+        <Property Id="PI_PORTAL_LOGIN" Secure="yes" />
         <Property Id="PI_PORTAL_PASSWORD" Secure="yes" />
         <Property Id="PI_PORTAL_PASSWORD_CONFIRM" Secure="yes" />
         <Property Id="PI_PORTAL_DOMAIN" Secure="yes" />
-        <Property Id="PI_PORTAL_CREATE_AD" Secure="yes"/>
+
+        <Property Id="PI_SERVER_CREATENEWACCOUNT" Secure="yes" Value="1" />
+        <Property Id="PI_ESERVER_CREATENEWACCOUNT" Secure="yes" Value="1" />
+        <Property Id="PI_PORTAL_CREATENEWACCOUNT" Secure="yes" Value="1" />
+        <Property Id="PI_SERVER_CREATEADACCOUNT" Secure="yes" Value="1" />
+        <Property Id="PI_ESERVER_CREATEADACCOUNT" Secure="yes" Value="1" />
+        <Property Id="PI_PORTAL_CREATEADACCOUNT" Secure="yes" Value="1" />
 
         <Property Id="PI_SCHEDULER_CRYPTO_KEY" Secure="yes" />
         <Property Id="PI_SCHEDULER_DB_SERVER" Secure="yes" />
@@ -792,54 +841,66 @@
         <CustomAction Id="CA_SqlServerListUI" BinaryKey="Assembly_CA" DllEntry="SqlServerListUI" />
         <CustomAction Id="CA_DirectoryObjectPicker" BinaryKey="MsiExt.ActiveDirectory" DllEntry="DirectoryObjectPicker" />
         <CustomAction Id="CA_SetEServerUrlUI" BinaryKey ="Assembly_CA" DllEntry="SetEServerUrlUI" />
+        <CustomAction Id="CA_ServerNormalizeLoginUI" BinaryKey ="Assembly_CA" DllEntry="ServerNormalizeLoginUI" />
+        <CustomAction Id="CA_EServerNormalizeLoginUI" BinaryKey ="Assembly_CA" DllEntry="EServerNormalizeLoginUI" />
+        <CustomAction Id="CA_PortalNormalizeLoginUI" BinaryKey ="Assembly_CA" DllEntry="PortalNormalizeLoginUI" />
         <CustomAction Id="CA_InstallWebFeatures" BinaryKey="Assembly_CA" DllEntry="InstallWebFeatures" />
-        <CustomAction Id="CA_InstallWebFeaturesDeferred" BinaryKey="Assembly_CA" DllEntry="InstallWebFeatures" Impersonate="no"  Execute="deferred" />
+        <CustomAction Id="CA_InstallWebFeaturesDeferred" BinaryKey="Assembly_CA" DllEntry="InstallWebFeatures" Impersonate="yes"  Execute="deferred" />
         <CustomAction Id="CA_PropertyInstallWebFeaturesDeferred" Property="CA_InstallWebFeaturesDeferred" Value="PI_PREREQ_IIS_INSTALL=[PI_PREREQ_IIS_INSTALL];PI_PREREQ_ASPNET_INSTALL=[PI_PREREQ_ASPNET_INSTALL];PI_PREREQ_NETFX_INSTALL=[PI_PREREQ_NETFX_INSTALL]" />
         <CustomAction Id="CA_GetDbSkip" BinaryKey="Assembly_CA" DllEntry="GetDbSkip" />
         <!--Run corresponding install scripts.-->
         <!-- Prepare and backup when upgrading from old to new installer type.
              Yes, session variables and custom action data are identical almost for corresponding WebsitePanel components in prepare and install scripts.
              Prepare scripts must be run before normal installation process and file copying.-->
-        <CustomAction Id="CA_PropertyOnServerPrepare" Property="CA_OnServerPrepare" Value="ApplicationName=$(var.NAME);ComponentName=$(var.ServerTitle);ComponentCode=server;ComponentDescription=$(var.ServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_SERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_SERVER_IP];WebSitePort=[PI_SERVER_PORT];WebSiteDomain=[PI_SERVER_HOST];UserDomain=[PI_SERVER_DOMAIN];UserAccount=[PI_SERVER_LOGIN];UserPassword=[PI_SERVER_PASSWORD];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_SERVER_ID];MainConfig=[COMPFOUND_SERVER_MAIN_CFG]" />
-        <CustomAction Id="CA_OnServerPrepare" BinaryKey="Assembly_CA" DllEntry="OnServerPrepare" Impersonate="no" Execute="deferred" HideTarget="no" />
-        <CustomAction Id="CA_PropertyOnEServerPrepare" Property="CA_OnEServerPrepare" Value="ApplicationName=$(var.NAME);ComponentName=$(var.EServerTitle);ComponentCode=enterprise server;ComponentDescription=$(var.EServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_ESERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_ESERVER_IP];WebSitePort=[PI_ESERVER_PORT];WebSiteDomain=[PI_ESERVER_HOST];UserDomain=[PI_ESERVER_DOMAIN];UserAccount=[PI_ESERVER_LOGIN];UserPassword=[PI_ESERVER_PASSWORD];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_ESERVER_ID];MainConfig=[COMPFOUND_ESERVER_MAIN_CFG]" />
-        <CustomAction Id="CA_OnEServerPrepare" BinaryKey="Assembly_CA" DllEntry="OnEServerPrepare" Impersonate="no" Execute="deferred" HideTarget="no" />
-        <CustomAction Id="CA_PropertyOnPortalPrepare" Property="CA_OnPortalPrepare" Value="ApplicationName=$(var.NAME);ComponentName=$(var.PortalTitle);ComponentCode=portal;ComponentDescription=$(var.PortalDescription);Version=$(var.VERSION);InstallationFolder=[PI_PORTAL_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_PORTAL_IP];WebSitePort=[PI_PORTAL_PORT];WebSiteDomain=[PI_PORTAL_HOST];UserDomain=[PI_PORTAL_DOMAIN];UserAccount=[PI_PORTAL_LOGIN];UserPassword=[PI_PORTAL_PASSWORD];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_PORTAL_ID];MainConfig=[COMPFOUND_PORTAL_MAIN_CFG]" />
-        <CustomAction Id="CA_OnPortalPrepare" BinaryKey="Assembly_CA" DllEntry="OnPortalPrepare" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_PropertyOnServerPrepare" Property="CA_OnServerPrepare" Value="ApplicationName=$(var.NAME);ComponentName=$(var.ServerTitle);ComponentCode=server;ComponentDescription=$(var.ServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_SERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_SERVER_IP];WebSitePort=[PI_SERVER_PORT];WebSiteDomain=[PI_SERVER_HOST];UserDomain=[PI_SERVER_DOMAIN];UserAccount=[PI_SERVER_LOGIN];UserPassword=[PI_SERVER_PASSWORD];NewUserAccount=[PI_SERVER_CREATENEWACCOUNT];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_SERVER_ID];MainConfig=[COMPFOUND_SERVER_MAIN_CFG]" />
+        <CustomAction Id="CA_OnServerPrepare" BinaryKey="Assembly_CA" DllEntry="OnServerPrepare" Impersonate="yes" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_PropertyOnEServerPrepare" Property="CA_OnEServerPrepare" Value="ApplicationName=$(var.NAME);ComponentName=$(var.EServerTitle);ComponentCode=enterprise server;ComponentDescription=$(var.EServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_ESERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_ESERVER_IP];WebSitePort=[PI_ESERVER_PORT];WebSiteDomain=[PI_ESERVER_HOST];UserDomain=[PI_ESERVER_DOMAIN];UserAccount=[PI_ESERVER_LOGIN];UserPassword=[PI_ESERVER_PASSWORD];NewUserAccount=[PI_ESERVER_CREATENEWACCOUNT];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_ESERVER_ID];MainConfig=[COMPFOUND_ESERVER_MAIN_CFG]" />
+        <CustomAction Id="CA_OnEServerPrepare" BinaryKey="Assembly_CA" DllEntry="OnEServerPrepare" Impersonate="yes" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_PropertyOnPortalPrepare" Property="CA_OnPortalPrepare" Value="ApplicationName=$(var.NAME);ComponentName=$(var.PortalTitle);ComponentCode=portal;ComponentDescription=$(var.PortalDescription);Version=$(var.VERSION);InstallationFolder=[PI_PORTAL_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_PORTAL_IP];WebSitePort=[PI_PORTAL_PORT];WebSiteDomain=[PI_PORTAL_HOST];UserDomain=[PI_PORTAL_DOMAIN];UserAccount=[PI_PORTAL_LOGIN];UserPassword=[PI_PORTAL_PASSWORD];NewUserAccount=[PI_PORTAL_CREATENEWACCOUNT];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_PORTAL_ID];MainConfig=[COMPFOUND_PORTAL_MAIN_CFG]" />
+        <CustomAction Id="CA_OnPortalPrepare" BinaryKey="Assembly_CA" DllEntry="OnPortalPrepare" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <CustomAction Id="CA_PropertyOnSchedulerPrepare" Property="CA_OnSchedulerPrepare" Value ="ApplicationName=$(var.NAME);ComponentName=$(var.SchedulerTitle);ComponentCode=scheduler service;ComponentDescription=$(var.SchedulerDescription);Version=$(var.VERSION);InstallationFolder=[PI_SCHEDULER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];CryptoKey=[PI_SCHEDULER_CRYPTO_KEY];DatabaseServer=[PI_SCHEDULER_DB_SERVER];DatabaseName=[PI_SCHEDULER_DB_DATABASE];DatabaseUser=[PI_SCHEDULER_DB_LOGIN];DatabaseUserPassword=[PI_SCHEDULER_DB_PASSWORD];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_SCHEDULER_ID];MainConfig=[COMPFOUND_SCHEDULER_MAIN_CFG]" />
-        <CustomAction Id="CA_OnSchedulerPrepare" BinaryKey="Assembly_CA" DllEntry="OnSchedulerPrepare" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_OnSchedulerPrepare" BinaryKey="Assembly_CA" DllEntry="OnSchedulerPrepare" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <!--Install scripts.-->
         <!--SCPA.-->
-        <CustomAction Id="CA_OnScpaProperty" Property="CA_OnScpa" Value="InstallerFolder=[WSP_INSTALL_DIR];ServerAdminPassword=[SERVERADMIN_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerWebSiteIP=[PI_SERVER_IP];ServerWebSitePort=[PI_SERVER_PORT];ServerPassword=[SERVER_ACCESS_PASSWORD];PortalWebSiteIP=[PI_PORTAL_IP]" />
-        <CustomAction Id="CA_OnScpa" BinaryKey="Assembly_CA" DllEntry="OnScpa" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_OnScpaProperty" Property="CA_OnScpa" Value="InstallerFolder=[WSP_INSTALL_DIR];ServerAdminPassword=[SERVERADMIN_PASSWORD];ServerPassword=[SERVER_ACCESS_PASSWORD]" />
+        <CustomAction Id="CA_OnScpa" BinaryKey="Assembly_CA" DllEntry="OnScpa" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <!--Server.-->
-        <CustomAction Id="CA_PropertyOnServerInstall" Property="CA_OnServerInstall" Value="ApplicationName=$(var.NAME);ComponentName=$(var.ServerTitle);ComponentCode=server;ComponentDescription=$(var.ServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_SERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_SERVER_IP];WebSitePort=[PI_SERVER_PORT];WebSiteDomain=[PI_SERVER_HOST];UserDomain=[PI_SERVER_DOMAIN];UserAccount=[PI_SERVER_LOGIN];UserPassword=[PI_SERVER_PASSWORD];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_SERVER_ID]" />
-        <CustomAction Id="CA_OnServerInstall" BinaryKey ="Assembly_CA" DllEntry="OnServerInstall" Impersonate="no" Execute="deferred" HideTarget="no"/>
+        <CustomAction Id="CA_PropertyOnServerInstall" Property="CA_OnServerInstall" Value="ApplicationName=$(var.NAME);ComponentName=$(var.ServerTitle);ComponentCode=server;ComponentDescription=$(var.ServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_SERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_SERVER_IP];WebSitePort=[PI_SERVER_PORT];WebSiteDomain=[PI_SERVER_HOST];UserDomain=[PI_SERVER_DOMAIN];UserAccount=[PI_SERVER_LOGIN];UserPassword=[PI_SERVER_PASSWORD];NewUserAccount=[PI_SERVER_CREATENEWACCOUNT];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_SERVER_ID]" />
+        <CustomAction Id="CA_OnServerInstall" BinaryKey ="Assembly_CA" DllEntry="OnServerInstall" Impersonate="yes" Execute="deferred" HideTarget="no"/>
         <!--EServer.-->
-        <CustomAction Id="CA_PropertyOnEServerInstall" Property="CA_OnEServerInstall" Value="ApplicationName=$(var.NAME);ComponentName=$(var.EServerTitle);ComponentCode=enterprise server;ComponentDescription=$(var.EServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_ESERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_ESERVER_IP];WebSitePort=[PI_ESERVER_PORT];WebSiteDomain=[PI_ESERVER_HOST];UserDomain=[PI_ESERVER_DOMAIN];UserAccount=[PI_ESERVER_LOGIN];UserPassword=[PI_ESERVER_PASSWORD];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_ESERVER_ID]" />
-        <CustomAction Id="CA_OnEServerInstall" BinaryKey ="Assembly_CA" DllEntry="OnEServerInstall" Impersonate="no" Execute="deferred" HideTarget="no"/>
+        <CustomAction Id="CA_PropertyOnEServerInstall" Property="CA_OnEServerInstall" Value="ApplicationName=$(var.NAME);ComponentName=$(var.EServerTitle);ComponentCode=enterprise server;ComponentDescription=$(var.EServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_ESERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_ESERVER_IP];WebSitePort=[PI_ESERVER_PORT];WebSiteDomain=[PI_ESERVER_HOST];UserDomain=[PI_ESERVER_DOMAIN];UserAccount=[PI_ESERVER_LOGIN];UserPassword=[PI_ESERVER_PASSWORD];NewUserAccount=[PI_ESERVER_CREATENEWACCOUNT];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_ESERVER_ID]" />
+        <CustomAction Id="CA_OnEServerInstall" BinaryKey ="Assembly_CA" DllEntry="OnEServerInstall" Impersonate="yes" Execute="deferred" HideTarget="no"/>
         <!--Portal.-->
-        <CustomAction Id="CA_PropertyOnPortalInstall" Property="CA_OnPortalInstall" Value="ApplicationName=$(var.NAME);ComponentName=$(var.PortalTitle);ComponentCode=portal;ComponentDescription=$(var.PortalDescription);Version=$(var.VERSION);InstallationFolder=[PI_PORTAL_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_PORTAL_IP];WebSitePort=[PI_PORTAL_PORT];WebSiteDomain=[PI_PORTAL_HOST];UserDomain=[PI_PORTAL_DOMAIN];UserAccount=[PI_PORTAL_LOGIN];UserPassword=[PI_PORTAL_PASSWORD];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_PORTAL_ID]" />
-        <CustomAction Id="CA_OnPortalInstall" BinaryKey ="Assembly_CA" DllEntry="OnPortalInstall" Impersonate="no" Execute="deferred" HideTarget="no"/>
+        <CustomAction Id="CA_PropertyOnPortalInstall" Property="CA_OnPortalInstall" Value="ApplicationName=$(var.NAME);ComponentName=$(var.PortalTitle);ComponentCode=portal;ComponentDescription=$(var.PortalDescription);Version=$(var.VERSION);InstallationFolder=[PI_PORTAL_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_PORTAL_IP];WebSitePort=[PI_PORTAL_PORT];WebSiteDomain=[PI_PORTAL_HOST];UserDomain=[PI_PORTAL_DOMAIN];UserAccount=[PI_PORTAL_LOGIN];UserPassword=[PI_PORTAL_PASSWORD];NewUserAccount=[PI_PORTAL_CREATENEWACCOUNT];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_PORTAL_ID]" />
+        <CustomAction Id="CA_OnPortalInstall" BinaryKey ="Assembly_CA" DllEntry="OnPortalInstall" Impersonate="yes" Execute="deferred" HideTarget="no"/>
         <!--Scheduler.-->
         <CustomAction Id="CA_PropertyOnSchedulerInstall" Property="CA_OnSchedulerInstall" Value ="ApplicationName=$(var.NAME);ComponentName=$(var.SchedulerTitle);ComponentCode=scheduler service;ComponentDescription=$(var.SchedulerDescription);Version=$(var.VERSION);InstallationFolder=[PI_SCHEDULER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];CryptoKey=[PI_SCHEDULER_CRYPTO_KEY];DatabaseServer=[PI_SCHEDULER_DB_SERVER];DatabaseName=[PI_SCHEDULER_DB_DATABASE];DatabaseUser=[PI_SCHEDULER_DB_LOGIN];DatabaseUserPassword=[PI_SCHEDULER_DB_PASSWORD];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_SCHEDULER_ID]" />
-        <CustomAction Id="CA_OnSchedulerInstall" BinaryKey="Assembly_CA" DllEntry="OnSchedulerInstall" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_OnSchedulerInstall" BinaryKey="Assembly_CA" DllEntry="OnSchedulerInstall" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <!--Run corresponding uninstall scripts.-->
         <CustomAction Id="CA_PropertyOnServerRemove" Property="CA_OnServerRemove" Value="InstallerFolder=[WSP_INSTALL_DIR];ComponentCode=server;BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE]" />
-        <CustomAction Id="CA_OnServerRemove" BinaryKey="Assembly_CA" DllEntry="OnServerRemove" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_OnServerRemove" BinaryKey="Assembly_CA" DllEntry="OnServerRemove" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <CustomAction Id="CA_PropertyOnEServerRemove" Property="CA_OnEServerRemove" Value="InstallerFolder=[WSP_INSTALL_DIR];ComponentCode=enterprise server;BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE]" />
-        <CustomAction Id="CA_OnEServerRemove" BinaryKey="Assembly_CA" DllEntry="OnEServerRemove" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_OnEServerRemove" BinaryKey="Assembly_CA" DllEntry="OnEServerRemove" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <CustomAction Id="CA_PropertyOnPortalRemove" Property="CA_OnPortalRemove" Value="InstallerFolder=[WSP_INSTALL_DIR];ComponentCode=portal;BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE]" />
-        <CustomAction Id="CA_OnPortalRemove" BinaryKey="Assembly_CA" DllEntry="OnPortalRemove" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_OnPortalRemove" BinaryKey="Assembly_CA" DllEntry="OnPortalRemove" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <CustomAction Id="CA_PropertyOnSchedulerRemove" Property="CA_OnSchedulerRemove" Value ="InstallerFolder=[WSP_INSTALL_DIR];ComponentCode=scheduler service;BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE]" />
-        <CustomAction Id="CA_OnSchedulerRemove" BinaryKey="Assembly_CA" DllEntry="OnSchedulerRemove" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_OnSchedulerRemove" BinaryKey="Assembly_CA" DllEntry="OnSchedulerRemove" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <!--Maintenance mode.-->
         <CustomAction Id="CA_PropertyMaintenanceServer" Property="CA_MaintenanceServer" Value="InstallerFolder=[WSP_INSTALL_DIR];ComponentCode=server;BaseDirectory=[WSP_INSTALL_DIR];ServerPassword=[SERVER_ACCESS_PASSWORD]" />
-        <CustomAction Id="CA_MaintenanceServer" BinaryKey="Assembly_CA" DllEntry="MaintenanceServer" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_MaintenanceServer" BinaryKey="Assembly_CA" DllEntry="MaintenanceServer" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <CustomAction Id="CA_PropertyMaintenanceEServer" Property="CA_MaintenanceEServer" Value="InstallerFolder=[WSP_INSTALL_DIR];ComponentCode=enterprise server;BaseDirectory=[WSP_INSTALL_DIR];ServerAdminPassword=[SERVERADMIN_PASSWORD];" />
-        <CustomAction Id="CA_MaintenanceEServer" BinaryKey="Assembly_CA" DllEntry="MaintenanceEServer" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_MaintenanceEServer" BinaryKey="Assembly_CA" DllEntry="MaintenanceEServer" Impersonate="yes" Execute="deferred" HideTarget="no" />
         <CustomAction Id="CA_PropertyMaintenancePortal" Property="CA_MaintenancePortal" Value="InstallerFolder=[WSP_INSTALL_DIR];ComponentCode=portal;BaseDirectory=[WSP_INSTALL_DIR];EnterpriseServerUrl=[PI_ESERVER_URL]" />
-        <CustomAction Id="CA_MaintenancePortal" BinaryKey="Assembly_CA" DllEntry="MaintenancePortal" Impersonate="no" Execute="deferred" HideTarget="no" />
+        <CustomAction Id="CA_MaintenancePortal" BinaryKey="Assembly_CA" DllEntry="MaintenancePortal" Impersonate="yes" Execute="deferred" HideTarget="no" />
+        <!--Rollback.-->
+        <CustomAction Id="CA_OnServerInstall_RollbackProperty" Property="CA_OnServerInstall_Rollback" Value="ApplicationName=$(var.NAME);ComponentName=$(var.ServerTitle);ComponentCode=server;ComponentDescription=$(var.ServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_SERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_SERVER_IP];WebSitePort=[PI_SERVER_PORT];WebSiteDomain=[PI_SERVER_HOST];UserDomain=[PI_SERVER_DOMAIN];UserAccount=[PI_SERVER_LOGIN];UserPassword=[PI_SERVER_PASSWORD];NewUserAccount=[PI_SERVER_CREATENEWACCOUNT];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_SERVER_ID]" />
+        <CustomAction Id="CA_OnEServerInstall_RollbackProperty" Property="CA_OnEServerInstall_Rollback" Value="ApplicationName=$(var.NAME);ComponentName=$(var.EServerTitle);ComponentCode=enterprise server;ComponentDescription=$(var.EServerDescription);Version=$(var.VERSION);InstallationFolder=[PI_ESERVER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_ESERVER_IP];WebSitePort=[PI_ESERVER_PORT];WebSiteDomain=[PI_ESERVER_HOST];UserDomain=[PI_ESERVER_DOMAIN];UserAccount=[PI_ESERVER_LOGIN];UserPassword=[PI_ESERVER_PASSWORD];NewUserAccount=[PI_ESERVER_CREATENEWACCOUNT];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_ESERVER_ID]" />
+        <CustomAction Id="CA_OnPortalInstall_RollbackProperty" Property="CA_OnPortalInstall_Rollback" Value="ApplicationName=$(var.NAME);ComponentName=$(var.PortalTitle);ComponentCode=portal;ComponentDescription=$(var.PortalDescription);Version=$(var.VERSION);InstallationFolder=[PI_PORTAL_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];WebSiteIP=[PI_PORTAL_IP];WebSitePort=[PI_PORTAL_PORT];WebSiteDomain=[PI_PORTAL_HOST];UserDomain=[PI_PORTAL_DOMAIN];UserAccount=[PI_PORTAL_LOGIN];UserPassword=[PI_PORTAL_PASSWORD];NewUserAccount=[PI_PORTAL_CREATENEWACCOUNT];ServerPassword=[SERVER_ACCESS_PASSWORD];EnterpriseServerUrl=[PI_ESERVER_URL];ServerAdminPassword=[SERVERADMIN_PASSWORD];DatabaseServer=[DB_SERVER];DatabaseName=[DB_DATABASE];DbServerAdmin=[DB_LOGIN];DbServerAdminPassword=[DB_PASSWORD];DbAuth=[DB_AUTH];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_PORTAL_ID]" />
+        <CustomAction Id="CA_OnSchedulerInstall_RollbackProperty" Property="CA_OnSchedulerInstall_Rollback" Value ="ApplicationName=$(var.NAME);ComponentName=$(var.SchedulerTitle);ComponentCode=scheduler service;ComponentDescription=$(var.SchedulerDescription);Version=$(var.VERSION);InstallationFolder=[PI_SCHEDULER_INSTALL_DIR];InstallerFolder=[WSP_INSTALL_DIR];Installer=Microsoft Windows Installer;InstallerType=MSI;InstallerPath=[OriginalDatabase];IISVersion=[];SetupXml=[];CryptoKey=[PI_SCHEDULER_CRYPTO_KEY];DatabaseServer=[PI_SCHEDULER_DB_SERVER];DatabaseName=[PI_SCHEDULER_DB_DATABASE];DatabaseUser=[PI_SCHEDULER_DB_LOGIN];DatabaseUserPassword=[PI_SCHEDULER_DB_PASSWORD];BaseDirectory=[WSP_INSTALL_DIR];MODE_UP=[WIX_UPGRADE_DETECTED];MODE_RUP=[UPGRADINGPRODUCTCODE];ComponentId=[COMPFOUND_SCHEDULER_ID]" />
+        <CustomAction Id="CA_OnServerInstall_Rollback" BinaryKey="Assembly_CA" DllEntry="InstallRollback" Impersonate="yes" Execute="rollback" HideTarget="no" />
+        <CustomAction Id="CA_OnEServerInstall_Rollback" BinaryKey="Assembly_CA" DllEntry="InstallRollback" Impersonate="yes" Execute="rollback" HideTarget="no" />
+        <CustomAction Id="CA_OnPortalInstall_Rollback" BinaryKey="Assembly_CA" DllEntry="InstallRollback" Impersonate="yes" Execute="rollback" HideTarget="no" />
+        <CustomAction Id="CA_OnSchedulerInstall_Rollback" BinaryKey="Assembly_CA" DllEntry="SchedulerInstallRollback" Impersonate="yes" Execute="rollback" HideTarget="no" />
         <!---->
         <CustomAction Id="CA_PreFillSettings" BinaryKey="Assembly_CA" DllEntry="PreFillSettings" />
         <!---->
@@ -905,6 +966,15 @@
             <Custom Action="CA_PropertyInstallWebFeaturesDeferred" After="InstallValidate"><![CDATA[NOT REMOVE AND (PI_PREREQ_IIS_INSTALL=1 OR PI_PREREQ_ASPNET_INSTALL=1 OR PI_PREREQ_NETFX_INSTALL=1)]]></Custom>
             <Custom Action="CA_InstallWebFeatures" After="InstallInitialize"><![CDATA[NOT REMOVE AND (PI_PREREQ_IIS_INSTALL=1 OR PI_PREREQ_ASPNET_INSTALL=1 OR PI_PREREQ_NETFX_INSTALL=1)]]></Custom>
             <Custom Action="CA_InstallWebFeaturesDeferred" After="CA_InstallWebFeatures"><![CDATA[NOT REMOVE AND (PI_PREREQ_IIS_INSTALL=1 OR PI_PREREQ_ASPNET_INSTALL=1 OR PI_PREREQ_NETFX_INSTALL=1)]]></Custom>
+            <!--Rollback.-->
+            <Custom Action="CA_OnServerInstall_RollbackProperty" Before="InstallValidate"><![CDATA[(&ServerFeature=3) AND NOT(!ServerFeature=3)]]></Custom>
+            <Custom Action="CA_OnServerInstall_Rollback" Before="CA_OnServerInstall"><![CDATA[(&ServerFeature=3) AND NOT(!ServerFeature=3)]]></Custom>
+            <Custom Action="CA_OnEServerInstall_RollbackProperty" Before="InstallValidate"><![CDATA[(&EnterpriseServerFeature=3) AND NOT(!EnterpriseServerFeature=3)]]></Custom>
+            <Custom Action="CA_OnEServerInstall_Rollback" Before="CA_OnEServerInstall"><![CDATA[(&EnterpriseServerFeature=3) AND NOT(!EnterpriseServerFeature=3)]]></Custom>
+            <Custom Action="CA_OnPortalInstall_RollbackProperty" Before="InstallValidate"><![CDATA[(&PortalFeature=3) AND NOT(!PortalFeature=3)]]></Custom>
+            <Custom Action="CA_OnPortalInstall_Rollback" Before="CA_OnPortalInstall"><![CDATA[(&PortalFeature=3) AND NOT(!PortalFeature=3)]]></Custom>
+            <Custom Action="CA_OnSchedulerInstall_RollbackProperty" Before="InstallValidate"><![CDATA[(&SchedulerServiceFeature=3) AND NOT(!SchedulerServiceFeature=3)]]></Custom>
+            <Custom Action="CA_OnSchedulerInstall_Rollback" Before="CA_OnSchedulerInstall"><![CDATA[(&SchedulerServiceFeature=3) AND NOT(!SchedulerServiceFeature=3)]]></Custom>
         </InstallExecuteSequence>
         <InstallUISequence>
             <Custom Action="CA_NeedNetFx" Before="LaunchConditions"><![CDATA[NETFRAMEWORK40FULL="#0"]]></Custom>
@@ -918,6 +988,9 @@
         </InstallUISequence>
     </Product>
     <Fragment>
+        <sql:SqlDatabase Id="SqlDatabaseUpdateWin" Server="[DB_SERVER]" Database="[DB_DATABASE]" />
+        <util:User Id="SqlUpdateUser" Name="[DB_LOGIN]" Password="[DB_PASSWORD]" />  
+        <sql:SqlDatabase Id="SqlDatabaseUpdateSql" Server="[DB_SERVER]" Database="[DB_DATABASE]" User="SqlUpdateUser" />   
         <ComponentGroup Id="DatabaseInstallation">
             <ComponentRef Id="InstallDatabaseSql"/>
             <ComponentRef Id="InstallDatabaseWin"/>
@@ -934,21 +1007,15 @@
                                  Server="[DB_SERVER]"
                                  Database="[DB_DATABASE]"
                                  User="SqlUser">
-                    <sql:SqlScript Id="SqlInstallScriptSql" ExecuteOnInstall="yes" BinaryKey="InstallDB" Sequence="1"/>
+                    <sql:SqlScript Id="SqlInstallScriptSql" ExecuteOnInstall="yes" ExecuteOnReinstall="no" ExecuteOnUninstall="no"
+                                   ContinueOnError="no" BinaryKey="InstallDB" Sequence="1" />
                 </sql:SqlDatabase>
             </Component>
             <Component Id="UpdateDatabaseSql" Guid="{089C02F9-D598-435E-8DA9-FC8AED00495C}">
                 <Condition>NOT (Remove="ALL") AND NOT(DB_AUTH = "Windows Authentication")</Condition>
                 <CreateFolder />
-                <util:User Id="SqlUpdateUser" Name="[DB_LOGIN]" Password="[DB_PASSWORD]" CreateUser="no" />
-                <sql:SqlDatabase Id="SqlDatabaseUpdateSql" ConfirmOverwrite="no" ContinueOnError="no" CreateOnInstall="yes" CreateOnReinstall="yes" CreateOnUninstall="no"
-                                 DropOnInstall="no" DropOnReinstall="no" DropOnUninstall="no"
-                                 Server="[DB_SERVER]"
-                                 Database="[DB_DATABASE]"
-                                 User="SqlUpdateUser">
-                    <sql:SqlScript Id="SqlUpdateScriptSql" BinaryKey="UpdateDB" Sequence="2"
-                                   ContinueOnError="no" ExecuteOnInstall="yes" ExecuteOnReinstall="yes" ExecuteOnUninstall="no"/>
-                </sql:SqlDatabase>
+                <sql:SqlScript Id="SqlUpdateScriptSql" ExecuteOnInstall="yes" ExecuteOnReinstall="yes" ExecuteOnUninstall="no"
+                                   ContinueOnError="no" BinaryKey="UpdateDB" Sequence="2" SqlDb="SqlDatabaseUpdateSql" />
             </Component>
             <Component Id="InstallDatabaseWin" Guid="{C50FC58C-3EF3-452D-BA9B-C9513B4D941A}">
                 <CreateFolder />
@@ -957,19 +1024,15 @@
                                  DropOnInstall="no" DropOnReinstall="no" DropOnUninstall="no"
                                  Server="[DB_SERVER]"
                                  Database="[DB_DATABASE]">
-                    <sql:SqlScript Id="SqlInstallScriptWin" ExecuteOnInstall="yes" BinaryKey="InstallDB" Sequence="10"/>
+                    <sql:SqlScript Id="SqlInstallScriptWin" ExecuteOnInstall="yes" ExecuteOnReinstall="no" ExecuteOnUninstall="no"
+                                   ContinueOnError="no" BinaryKey="InstallDB" Sequence="10" />
                 </sql:SqlDatabase>
             </Component>
             <Component Id="UpdateDatabaseWin" Guid="{A2770B5C-DA46-4125-950F-73A640EB312B}">
                 <Condition>NOT (Remove="ALL") AND (DB_AUTH = "Windows Authentication")</Condition>
                 <CreateFolder />
-                <sql:SqlDatabase Id="SqlDatabaseUpdateWin" ConfirmOverwrite="no" ContinueOnError="no" CreateOnInstall="yes" CreateOnReinstall="yes" CreateOnUninstall="no"
-                                 DropOnInstall="no" DropOnReinstall="no" DropOnUninstall="no"
-                                 Server="[DB_SERVER]"
-                                 Database="[DB_DATABASE]">
-                    <sql:SqlScript Id="SqlUpdateScriptWin" BinaryKey="UpdateDB"  Sequence="11"
-                                       ContinueOnError="no" ExecuteOnInstall="yes" ExecuteOnReinstall="yes" ExecuteOnUninstall="no" />
-                </sql:SqlDatabase>
+                <sql:SqlScript Id="SqlUpdateScriptWin" ExecuteOnInstall="yes" ExecuteOnReinstall="yes" ExecuteOnUninstall="no"
+                                   ContinueOnError="no" BinaryKey="UpdateDB"  Sequence="11" SqlDb="SqlDatabaseUpdateWin" />
             </Component>
         </DirectoryRef>
     </Fragment>

@@ -46,5 +46,10 @@ namespace WebsitePanel.Providers.Utils
 
 		/// <summary>"LOCAL SERVICE" SID</summary>
 		public const string LOCAL_SERVICE = "S-1-5-19";
-	}
+
+        // 06.09.2015 roland.breitschaft@x-company.de
+        // New: Add SID for EveryOne
+        /// <summary>Everyone SID</summary>
+        public const string EVERYONE = "S-1-1-0";
+    }
 }

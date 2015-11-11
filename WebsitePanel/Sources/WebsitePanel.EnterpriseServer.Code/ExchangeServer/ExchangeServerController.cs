@@ -217,7 +217,7 @@ namespace WebsitePanel.EnterpriseServer
                     stats.UsedArchingStorage = tempStats.UsedArchingStorage;
 
                     stats.CreatedSharedMailboxes = tempStats.CreatedSharedMailboxes;
-                    stats.CreatedResourceMailboxes = tempStats.CreatedResourceMailboxes;
+                    stats.CreatedResourceMailboxes = tempStats.CreatedResourceMailboxes;        
                 }
                 else
                 {

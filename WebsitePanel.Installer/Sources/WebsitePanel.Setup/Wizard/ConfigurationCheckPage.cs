@@ -240,7 +240,10 @@ namespace WebsitePanel.Setup
                     version == OS.WindowsVersion.WindowsServer2012R2 ||
                     version == OS.WindowsVersion.WindowsVista ||
                     version == OS.WindowsVersion.Windows7 ||
-                    version == OS.WindowsVersion.Windows8 ))
+                    version == OS.WindowsVersion.Windows8 ||
+                    version == OS.WindowsVersion.Win32NTServer ||
+                    version == OS.WindowsVersion.Win32NTWorkstation
+                    ))
 				{
 					details = "OS required: Windows Server 2008/2008 R2/2012 or Windows Vista/7/8.";
 					Log.WriteError(string.Format("OS check: {0}", details), null);
@@ -596,7 +599,7 @@ namespace WebsitePanel.Setup
                 return false;
 
             int value = (int)regkey.GetValue("MajorVersion", 0);
-            return value == 7 || value == 8;
+            return value >= 7;
 		}
 
 		private static bool IsAspNetRoleServiceInstalled()

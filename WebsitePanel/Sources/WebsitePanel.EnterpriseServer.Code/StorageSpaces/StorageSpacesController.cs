@@ -609,7 +609,11 @@ namespace WebsitePanel.EnterpriseServer
 
         private static string CreateFilePath(string path, string organizationId, string groupName, string folderName)
         {
-            return Path.Combine(path, groupName, organizationId, folderName);
+            // 06.09.2015 roland.breitschaft@x-company.de
+            // Problem: The folder will not created in the Storage-Space
+            // Fix: Remove groupName from Path-Creation
+            // return Path.Combine(path, groupName, organizationId, folderName);
+            return Path.Combine(path, organizationId, folderName);
         }
 
         public static ResultObject DeleteStorageSpaceFolder(int storageSpaceId, int storageSpaceFolderId)

@@ -18,7 +18,8 @@
             <wsp:SimpleMessageBox ID="messageBox" runat="server" />
 
             <wsp:CollapsiblePanel ID="colStorageSpaceGeneralSettings" runat="server"
-                TargetControlID="panelStorageSpaceGeneralSettings" meta:ResourceKey="colStorageSpaceGeneralSettings"></wsp:CollapsiblePanel>
+                TargetControlID="panelStorageSpaceGeneralSettings" meta:ResourceKey="colStorageSpaceGeneralSettings">
+            </wsp:CollapsiblePanel>
 
             <asp:Panel runat="server" ID="panelStorageSpaceGeneralSettings">
                 <asp:UpdatePanel runat="server">
@@ -73,7 +74,16 @@
                                         <asp:TextBox ID="txtStorageSize" runat="server" CssClass="HugeTextBox200"></asp:TextBox>
                                         <asp:RequiredFieldValidator ID="valRequireFolderSize" runat="server" meta:resourcekey="valRequireStorageSize" ControlToValidate="txtStorageSize"
                                             ErrorMessage="Enter Storage Size" ValidationGroup="SaveSpaceStorage" Display="Dynamic" Text="*" SetFocusOnError="True"></asp:RequiredFieldValidator>
-                                        <asp:RangeValidator ID="rangeStorageSize" runat="server" ControlToValidate="txtStorageSize" meta:resourcekey="rangeStorageSize" MaximumValue="99999999" MinimumValue="0.01" Type="Double"
+                                        
+                                        <%--
+                                            01.09.2015 roland.breitschaft@x-company.de 
+                                            Problem: Portal will raise an Error for the Range-Validator. It could not convert the double-Value
+                                            Fix: Set the minimum Value to 0                                            
+                                            --%>
+
+                                        <%--<asp:RangeValidator ID="RangeValidator1" runat="server" ControlToValidate="txtStorageSize" meta:resourcekey="rangeStorageSize" MaximumValue="99999999" MinimumValue="0.01" Type="Double"
+                                            ValidationGroup="SaveSpaceStorage" Display="Dynamic" Text="*" SetFocusOnError="True" />--%>
+                                        <asp:RangeValidator ID="rangeStorageSize" runat="server" ControlToValidate="txtStorageSize" meta:resourcekey="rangeStorageSize" MaximumValue="99999999" MinimumValue="0" Type="Double"
                                             ValidationGroup="SaveSpaceStorage" Display="Dynamic" Text="*" SetFocusOnError="True" />
                                     </td>
                                 </tr>
@@ -89,7 +99,7 @@
                                     <td class="Label">
                                         <asp:Localize ID="locIsDisabled" runat="server" meta:resourcekey="locIsDisabled" Text="Disable new folder creation:"></asp:Localize></td>
                                     <td class="FormRBtnL">
-                                        <asp:CheckBox runat="server" ID="chkIsDisabled" meta:resourcekey="chkIsDisabled" Text="Yes"/>
+                                        <asp:CheckBox runat="server" ID="chkIsDisabled" meta:resourcekey="chkIsDisabled" Text="Yes" />
                                     </td>
                                 </tr>
                             </table>
@@ -109,15 +119,15 @@
 </div>
 
 
-<script type="text/javascript"> 
-   // if you use jQuery, you can load them when dom is read.
-   $(document).ready(function () {
-       var prm = Sys.WebForms.PageRequestManager.getInstance();    
-       prm.add_endRequest(EndRequest);
-    });        
+<script type="text/javascript">
+    // if you use jQuery, you can load them when dom is read.
+    $(document).ready(function () {
+        var prm = Sys.WebForms.PageRequestManager.getInstance();
+        prm.add_endRequest(EndRequest);
+    });
 
 
     function EndRequest(sender, args) {
         CloseProgressDialog();
     }
-</script> 
+</script>

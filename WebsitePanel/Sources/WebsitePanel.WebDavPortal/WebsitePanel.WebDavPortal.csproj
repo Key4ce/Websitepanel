@@ -23,6 +23,7 @@
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,9 +54,6 @@
     </Reference>
     <Reference Include="AutoMapper.Net4">
       <HintPath>..\packages\AutoMapper.3.3.1\lib\net40\AutoMapper.Net4.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\packages\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CobaltCore">
       <HintPath>..\..\Lib\References\Microsoft\Microsoft.CobaltCore.dll</HintPath>
@@ -155,6 +153,10 @@
     </Reference>
     <Reference Include="WebsitePanel.Providers.Base">
       <HintPath>..\..\Bin\WebsitePanel.Providers.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="WebsitePanel.Server.Utils, Version=2.1.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Bin\WebsitePanel.Server.Utils.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

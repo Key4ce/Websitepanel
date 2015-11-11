@@ -77,5 +77,12 @@ namespace WebsitePanel.Providers.OS
         }
 
         #endregion
+
+        // 05.09.2015 roland.breitschaft@x-company.de
+        // Add an Empty-Quota Creator
+        public static Quota Empty()
+        {
+            return new Quota();
+        }
     }
 }

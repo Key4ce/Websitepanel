@@ -622,7 +622,9 @@
 		<Exec Command="copy $(TrunkFolder)\Resources\database_header.sql+$(DatabaseFolder)\install_db_temp.sql $(DatabaseFolder)\install_db.sql" />
 
 		<MakeDir Directories="$(EnterpriseServerInstall)\Setup"/>
+
 		<Copy SourceFiles="$(DatabaseFolder)\install_db.sql" DestinationFolder="$(EnterpriseServerInstall)\Setup" />
+
 
 		<Delete Files="$(DatabaseFolder)\install_db_temp.sql" />
 	</Target>
@@ -696,12 +698,14 @@
            <Output TaskParameter="TargetOutputs" ItemName="StandaloneFullMsi" />
         </MSBuild>
 		<Copy SourceFiles="@(StandaloneFullMsi)" DestinationFolder="$(DeployFolder)\%(RecursiveDir)" />
+		<Delete Files="$(RootFolder)\Websitepanel.Installer\Sources\Setup.WIXBootstrapper\Websitepanel.msi"/>
+		<Copy SourceFiles="@(StandaloneFullMsi)" DestinationFolder="$(RootFolder)\Websitepanel.Installer\Sources\Setup.WIXBootstrapper" />
 
 
     </Target>
 
 	<Target Name="CreateStandaloneBootstrapper" DependsOnTargets="CreateStandaloneFullMsi">
-        <MSBuild Projects='$(RootFolder)\WebsitePanel.Installer\Sources\Setup.WIXBootstrapper\Setup.WIXBootstrapper.wixproj' Properties='Configuration=$(BuildConfiguration)' Targets='Build'>
+        <MSBuild Projects='$(RootFolder)\WebsitePanel.Installer\Sources\Setup.WIXBootstrapper\Setup.WIXBootstrapper.csproj' Properties='Configuration=$(BuildConfiguration)' Targets='Build'>
            <Output TaskParameter="TargetOutputs" ItemName="StandaloneBootstrapper" />
         </MSBuild>
 		<Copy SourceFiles="@(StandaloneBootstrapper)" DestinationFolder="$(DeployFolder)\%(RecursiveDir)" />
@@ -889,6 +893,7 @@
 		  <FtpUpload Username="$(ftpUsername)" password="$(ftpPassword)" RemoteUri="ftp://$(ftphost)/WebsitePanelSetup-$(Version).exe" LocalFile="$(DeployFolder)\WebsitePanelSetup.exe" />
 		  <FtpUpload Username="$(ftpUsername)" password="$(ftpPassword)" RemoteUri="ftp://$(ftphost)/Manual-Update-$(Version).zip" LocalFile="$(DeployFolder)\Manual-Update.zip" />
       <FtpUpload Username="$(ftpUsername)" password="$(ftpPassword)" RemoteUri="ftp://$(ftphost)/WebsitePanel-FixDefaultPublicFolderMailbox-$(Version).zip" LocalFile="$(ToolsFolder)\WebsitePanel-FixDefaultPublicFolderMailbox-$(Version).zip" />
+
   </Target>
 
   <Import Project="$(RootFolder)\tools\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets"/>

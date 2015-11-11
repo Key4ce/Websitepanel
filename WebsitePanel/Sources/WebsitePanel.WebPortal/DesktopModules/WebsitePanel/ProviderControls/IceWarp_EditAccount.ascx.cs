@@ -36,7 +36,6 @@ namespace WebsitePanel.Portal.ProviderControls
         protected void Page_Load(object sender, EventArgs e)
         {
             // Hide some form items when creating a new account
-            passwordRow.Visible = (PanelRequest.ItemID > 0);
             AutoresponderPanel.Visible = (PanelRequest.ItemID > 0);
             secAutoresponder.Visible = (PanelRequest.ItemID > 0);
             ForwardingPanel.Visible = (PanelRequest.ItemID > 0);
@@ -108,7 +107,6 @@ namespace WebsitePanel.Portal.ProviderControls
             item.ForwardingEnabled = !string.IsNullOrWhiteSpace(txtForward.Text);
             item.ForwardingAddresses = Utils.ParseDelimitedString(txtForward.Text, ';', ' ', ',');
             item.DeleteOnForward = cbDeleteOnForward.Checked;
-            item.ChangePassword = cbChangePassword.Checked;
             item.IsDomainAdmin = cbDomainAdmin.Checked;
 
             item.DeleteOlder = cbDeleteOlder.Checked;

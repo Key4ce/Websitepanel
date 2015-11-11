@@ -40,6 +40,7 @@ using WebsitePanel.Server.Utils;
 using WebsitePanel.Providers.Utils;
 using WebsitePanel.Providers.OS;
 using WebsitePanel.Providers.Web;
+using System.Management.Automation.Runspaces;
 
 namespace WebsitePanel.Providers.EnterpriseStorage
 {
@@ -329,11 +330,11 @@ namespace WebsitePanel.Providers.EnterpriseStorage
                     });
                 }
 
-                foreach (var user in rule.Roles)
+                foreach (var role in rule.Roles)
                 {
                     users.Add(new UserPermission
                     {
-                        AccountName = user,
+                        AccountName = role,
                         Read = rule.Read,
                         Write = rule.Write
                     });
@@ -347,7 +348,12 @@ namespace WebsitePanel.Providers.EnterpriseStorage
 
             SecurityUtils.ResetNtfsPermissions(path);
 
-            SecurityUtils.GrantGroupNtfsPermissions(path, users.ToArray(), false, new RemoteServerSettings(), null, null);
+            // 06.09.2015 roland.breitschaft@x-company.de
+            // Problem: Serversettings for the Method 'GrantGroupNtfsPermission' is an Default Object, but we need the real Object
+            // for the real Settings, to determine Objects from AD
+            // Fix: Give the Helper-Class SecurityUtils the real ServerSettings-Object
+            // SecurityUtils.GrantGroupNtfsPermissions(path, users.ToArray(), false, new RemoteServerSettings(), null, null);
+            SecurityUtils.GrantGroupNtfsPermissions(path, users.ToArray(), false, ServerSettings, "*", "*");
 
             IWebDav webdav = new WebDav(webDavSetting);
 
@@ -550,7 +556,10 @@ namespace WebsitePanel.Providers.EnterpriseStorage
 
         protected WebDavSetting[] GetWebDavSettings(WebDavSetting[] settings)
         {
-            var webDavSettings = new ArrayList();
+            // 06.09.2015 roland.breitschaft@x-company.de
+            // Define a List as an temporary Storage-Object. It´s easier to handle.
+            // var webDavSettings = new ArrayList();
+            var webDavSettings = new List<WebDavSetting>();
 
             foreach (var setting in settings)
             {
@@ -561,11 +570,16 @@ namespace WebsitePanel.Providers.EnterpriseStorage
             }
 
             if (webDavSettings.Count == 0)
-            {
                 return new WebDavSetting[] { GetWebDavSetting(new WebDavSetting()) };
-            }
+            else
+                // 06.09.2015 roland.breitschaft@x-company.de
+                // Problem: Parts of settings are empty. But the Method returns the wrong Settings-Object
+                // Fix: Return the Cleaned Settings-Object    
+                return webDavSettings.ToArray();
 
-            return settings;
+            // return settings;
+            
+
         }
     }
 }

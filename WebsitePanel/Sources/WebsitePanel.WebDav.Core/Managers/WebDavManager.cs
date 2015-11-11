@@ -8,7 +8,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml.Serialization;
-using log4net;
 using WebsitePanel.Providers.OS;
 using WebsitePanel.WebDav.Core.Client;
 using WebsitePanel.WebDav.Core.Config;
@@ -28,16 +27,13 @@ namespace WebsitePanel.WebDav.Core.Managers
         private readonly WebDavSession _webDavSession;
         private readonly IWebDavAuthorizationService _webDavAuthorizationService;
 
-        private readonly ILog Log;
-
         private bool _isRoot = true;
         private IFolder _currentFolder;
 
         public WebDavManager(ICryptography cryptography, IWebDavAuthorizationService webDavAuthorizationService)
         {
             _cryptography = cryptography;
-            _webDavAuthorizationService = webDavAuthorizationService;
-            Log = LogManager.GetLogger(this.GetType());
+            _webDavAuthorizationService = webDavAuthorizationService;        
 
             _webDavSession = new WebDavSession();
         }

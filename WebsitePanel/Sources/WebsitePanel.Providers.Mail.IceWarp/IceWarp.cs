@@ -984,12 +984,7 @@ namespace WebsitePanel.Providers.Mail
             accountObject.SetProperty("U_Name", mailbox.FullName);
             accountObject.SetProperty("U_AccountDisabled", mailbox.IceWarpAccountState);
             accountObject.SetProperty("U_DomainAdmin", mailbox.IsDomainAdmin);
-
-            if (mailbox.ChangePassword)
-            {
-                accountObject.SetProperty("U_Password", mailbox.Password);
-            }
-
+            accountObject.SetProperty("U_Password", mailbox.Password);
             accountObject.SetProperty("U_MaxBoxSize", mailbox.MaxMailboxSize * 1024);
             accountObject.SetProperty("U_MaxBox", mailbox.MaxMailboxSize > 0 ? "1" : "0");
             accountObject.SetProperty("U_MaxMessageSize", mailbox.MaxMessageSizeMegaByte * 1024);

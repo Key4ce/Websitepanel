@@ -64,6 +64,7 @@ namespace WebsitePanel.Setup
 			public const string ServerPassword = "ServerPassword";
 			public const string UserDomain = "UserDomain";
 			public const string UserAccount = "UserAccount";
+            public const string NewUserAccount = "NewUserAccount";
 			public const string UserPassword = "UserPassword";
 			public const string CryptoKey = "CryptoKey";
 			public const string ServerAdminPassword = "ServerAdminPassword";

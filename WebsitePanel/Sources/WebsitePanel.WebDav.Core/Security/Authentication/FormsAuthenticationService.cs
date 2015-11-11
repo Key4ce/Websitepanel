@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.Security;
 using WebsitePanel.EnterpriseServer.Base.HostedSolution;
+using WebsitePanel.Server.Utils;
 using WebsitePanel.WebDav.Core.Config;
 using WebsitePanel.WebDav.Core.Interfaces.Security;
 using WebsitePanel.WebDav.Core.Security.Authentication.Principals;
@@ -20,12 +21,28 @@ namespace WebsitePanel.WebDav.Core.Security.Authentication
 
         public FormsAuthenticationService(ICryptography cryptography)
         {
+            Log.WriteStart("FormsAuthenticationService");
+
             _cryptography = cryptography;
-            _principalContext = new PrincipalContext(ContextType.Domain, WebDavAppConfigManager.Instance.UserDomain);
+
+            try
+            {
+                _principalContext = new PrincipalContext(ContextType.Domain, WebDavAppConfigManager.Instance.UserDomain);
+            }
+            catch (Exception ex)
+            {
+
+                Log.WriteError(ex);
+            }
+            
+
+            Log.WriteEnd("FormsAuthenticationService");
         }
 
         public WspPrincipal LogIn(string login, string password)
         {
+            Log.WriteStart("Login");
+
             if (ValidateAuthenticationData(login, password) == false)
             {
                 return null;
@@ -49,6 +66,8 @@ namespace WebsitePanel.WebDav.Core.Security.Authentication
             }
 
             Thread.CurrentPrincipal = principal;
+
+            Log.WriteEnd("Login");
 
             return principal;
         }
@@ -80,6 +99,8 @@ namespace WebsitePanel.WebDav.Core.Security.Authentication
 
         public bool ValidateAuthenticationData(string login, string password)
         {
+            Log.WriteStart("ValidateAuthenticationData");
+
             if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
             {
                 return false;
@@ -91,6 +112,8 @@ namespace WebsitePanel.WebDav.Core.Security.Authentication
             {
                 return false;
             }
+
+            Log.WriteEnd("ValidateAuthenticationData");
 
             return true;
         }

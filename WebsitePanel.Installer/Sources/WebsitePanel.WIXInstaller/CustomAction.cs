@@ -33,10 +33,13 @@ using System.Data;
 using System.Data.Sql;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.ActiveDirectory;
+using System.DirectoryServices.Protocols;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.ServiceProcess;
@@ -60,6 +63,180 @@ namespace WebsitePanel.WIXInstaller
 
         #region CustomActions
         [CustomAction]
+        public static ActionResult ServerNormalizeLoginUI(Session Ctx)
+        {
+            Ctx.AttachToSetupLog();
+            try
+            {
+                NormalizeLoginUI(Ctx, "SERVER");
+            }
+            catch (Exception ex)
+            {
+                Log.WriteError("Error in login", ex);
+            }
+            return ActionResult.Success;
+        }
+        [CustomAction]
+        public static ActionResult EServerNormalizeLoginUI(Session Ctx)
+        {
+            Ctx.AttachToSetupLog();
+            try
+            {
+                NormalizeLoginUI(Ctx, "ESERVER");
+            }
+            catch (Exception ex)
+            {
+                Log.WriteError("Error in login", ex);
+            }
+            return ActionResult.Success;
+        }
+        [CustomAction]
+        public static ActionResult PortalNormalizeLoginUI(Session Ctx)
+        {
+            Ctx.AttachToSetupLog();
+            try
+            {
+                NormalizeLoginUI(Ctx, "PORTAL");
+            }
+            catch (Exception ex)
+            {
+                Log.WriteError("Error in login", ex);
+            }
+            return ActionResult.Success;
+        }
+        [CustomAction]
+        public static ActionResult SchedulerInstallRollback(Session Ctx)
+        {
+            PopUpDebugger();
+            Ctx.AttachToSetupLog();
+            const string LogExt = ".InstallLog";
+            const string Title = "Rolling back component";
+            Log.WriteStart(Title);
+            Log.WriteInfo("It is normal that here occurs error.");
+            try
+            {
+                SetupVariables SetupVar = new SetupVariables();
+                WiXSetup.FillFromSession(Ctx.CustomActionData, SetupVar);
+                SetupVar.IISVersion = Tool.GetWebServerVersion();
+                SetupVar.ComponentId = GetProperty(Ctx, "ComponentId");
+
+                SetupVar.ServiceName = Global.Parameters.SchedulerServiceName;
+                SetupVar.ServiceFile = Path.Combine(SetupVar.InstallationFolder, Global.Parameters.SchedulerServiceFileName);
+
+                var Script = new ExpressScript(SetupVar);
+                Script.Actions.Add(new InstallAction(ActionTypes.UnregisterWindowsService)
+                {
+                    Name = SetupVar.ServiceName,
+                    Path = SetupVar.ServiceFile,
+                    Description = string.Format("Removing Windows service '{0}' ...", SetupVar.ServiceFile),
+                    Log = string.Format("- Remove {0} Windows service", SetupVar.ServiceName)
+                });
+                Script.Actions.Add(new InstallAction(ActionTypes.DeleteDirectoryFiles)
+                {
+                    Path = SetupVar.InstallFolder,
+                    FileFilter = x => x.ToLowerInvariant().EndsWith(LogExt.ToLowerInvariant())
+                });
+
+                Script.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.WriteError(ex.ToString());
+            }
+            Log.WriteEnd(Title);
+            return ActionResult.Success;
+        }
+        [CustomAction]
+        public static ActionResult InstallRollback(Session Ctx)
+        {
+            PopUpDebugger();
+            Ctx.AttachToSetupLog();
+            const string Title = "Rolling back component";
+            Log.WriteStart(Title);
+            Log.WriteInfo("It is normal that here occurs error.");
+            try
+            {
+                SetupVariables SetupVar = new SetupVariables();
+                WiXSetup.FillFromSession(Ctx.CustomActionData, SetupVar);
+                SetupVar.IISVersion = Tool.GetWebServerVersion();
+                SetupVar.ComponentId = GetProperty(Ctx, "ComponentId");
+
+                SetupVar.WebSiteId = SetupVar.ComponentFullName;
+                SetupVar.WebApplicationPoolName = string.Format("{0} Pool", SetupVar.ComponentFullName);
+                SetupVar.DatabaseUser = SetupVar.Database;
+
+                SetupScript Script = new ExpressScript(SetupVar);
+                InstallAction Act = null;
+
+                Act = new InstallAction(ActionTypes.DeleteWebSite);
+                Act.SiteId = SetupVar.WebSiteId;
+                Act.Description = "Deleting web site...";
+                Act.Log = string.Format("- Delete {0} web site", SetupVar.WebSiteId);
+                Script.Actions.Add(Act);
+
+                Act = new InstallAction(ActionTypes.DeleteApplicationPool);
+                Act.Name = SetupVar.ApplicationPool;
+                Act.Description = "Deleting application pool...";
+                Act.Log = string.Format("- Delete {0} application pool", SetupVar.ApplicationPool);
+                Script.Actions.Add(Act);
+
+                if (SetupVar.UserMembership != null && SetupVar.UserMembership.Length > 0)
+                {
+                    Act = new InstallAction(ActionTypes.DeleteUserMembership);
+                    Act.Name = SetupVar.UserAccount;
+                    Act.Domain = SetupVar.UserDomain;
+                    Act.Membership = SetupVar.UserMembership;
+                    Act.Description = "Removing user account membership...";
+                    Act.Log = string.Format("- Remove {0} user account membership", SetupVar.UserAccount);
+                    Script.Actions.Add(Act);
+                }
+
+                if (SetupVar.NewUserAccount)
+                {
+                    Act = new InstallAction(ActionTypes.DeleteUserAccount);
+                    Act.Name = SetupVar.UserAccount;
+                    Act.Domain = SetupVar.UserDomain;
+                    Act.Description = "Deleting user account...";
+                    Act.Log = string.Format("- Delete {0} user account", SetupVar.UserAccount);
+                    Script.Actions.Add(Act);
+                }
+
+                if (SetupVar.ComponentCode == Global.EntServer.ComponentCode)
+                {
+                    Act = new InstallAction(ActionTypes.DeleteDatabaseUser);
+                    Act.ConnectionString = SetupVar.InstallConnectionString;
+                    Act.UserName = SetupVar.DatabaseUser;
+                    Act.Description = "Deleting database user...";
+                    Act.Log = string.Format("- Delete {0} database user", SetupVar.DatabaseUser);
+                    Script.Actions.Add(Act);
+
+                    Act = new InstallAction(ActionTypes.DeleteDatabaseLogin);
+                    Act.ConnectionString = SetupVar.InstallConnectionString;
+                    Act.UserName = SetupVar.DatabaseUser;
+                    Act.Description = "Deleting database login...";
+                    Act.Log = string.Format("- Delete {0} database login", SetupVar.DatabaseUser);
+                    Script.Actions.Add(Act);
+                }
+
+                if (SetupVar.ComponentCode == Global.WebPortal.ComponentCode)
+                {
+                    Act = new InstallAction(ActionTypes.DeleteShortcuts);
+                    Act.Description = "Deleting shortcuts...";
+                    Act.Log = "- Delete shortcuts";
+                    Act.Name = "Login to MSPControl.url";
+                    Script.Actions.Add(Act);
+                }
+
+                Script.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.WriteError(ex.ToString());
+            }
+            Log.WriteEnd(Title);
+            return ActionResult.Success;
+        }
+        [CustomAction]
         public static ActionResult OnScpa(Session Ctx)
         {
             PopUpDebugger();
@@ -71,19 +248,26 @@ namespace WebsitePanel.WIXInstaller
             {
                 var Hash = Ctx.CustomActionData.ToNonGenericDictionary() as Hashtable;
                 var Scpa = new WebsitePanel.Setup.Actions.ConfigureStandaloneServerAction();
-                Scpa.ServerSetup = new SetupVariables { };
-                Scpa.EnterpriseServerSetup = new SetupVariables { };
-                Scpa.PortalSetup = new SetupVariables { };
-                Scpa.EnterpriseServerSetup.ServerAdminPassword = GetParam(Hash, "ServerAdminPassword");
-                Scpa.EnterpriseServerSetup.PeerAdminPassword = Scpa.EnterpriseServerSetup.ServerAdminPassword;
+                Scpa.ServerSetup = new SetupVariables { ComponentCode = Global.Server.ComponentCode };
+                Scpa.EnterpriseServerSetup = new SetupVariables { ComponentCode = Global.EntServer.ComponentCode };
+                Scpa.PortalSetup = new SetupVariables { ComponentCode = Global.WebPortal.ComponentCode };
+                Scpa.ServerSetup.InstallerFolder = GetParam(Hash, "InstallerFolder");
+                Scpa.EnterpriseServerSetup.InstallerFolder = GetParam(Hash, "InstallerFolder");
                 Scpa.PortalSetup.InstallerFolder = GetParam(Hash, "InstallerFolder");
+                Scpa.ServerSetup.IISVersion = Global.IISVersion;
+                Scpa.EnterpriseServerSetup.IISVersion = Global.IISVersion;
+                Scpa.PortalSetup.IISVersion = Global.IISVersion;
+                Scpa.ServerSetup.ComponentId = WiXSetup.GetComponentID(Scpa.ServerSetup);
+                Scpa.EnterpriseServerSetup.ComponentId = WiXSetup.GetComponentID(Scpa.EnterpriseServerSetup);
                 Scpa.PortalSetup.ComponentId = WiXSetup.GetComponentID(Scpa.PortalSetup);
                 AppConfig.LoadConfiguration(new ExeConfigurationFileMap { ExeConfigFilename = WiXSetup.GetFullConfigPath(Scpa.PortalSetup) });
-                Scpa.PortalSetup.EnterpriseServerURL = GetParam(Hash, "EnterpriseServerUrl");
-                Scpa.PortalSetup.WebSiteIP = GetParam(Hash, "PortalWebSiteIP");
-                Scpa.ServerSetup.WebSiteIP = GetParam(Hash, "ServerWebSiteIP");
-                Scpa.ServerSetup.WebSitePort = GetParam(Hash, "ServerWebSitePort");
+                AppConfig.LoadComponentSettings(Scpa.ServerSetup);
+                AppConfig.LoadComponentSettings(Scpa.EnterpriseServerSetup);
+                AppConfig.LoadComponentSettings(Scpa.PortalSetup);
                 Scpa.ServerSetup.ServerPassword = GetParam(Hash, "ServerPassword");
+                Scpa.EnterpriseServerSetup.ServerAdminPassword = GetParam(Hash, "ServerAdminPassword");
+                Scpa.EnterpriseServerSetup.PeerAdminPassword = Scpa.EnterpriseServerSetup.ServerAdminPassword;
+                Scpa.PortalSetup.EnterpriseServerURL = Scpa.EnterpriseServerSetup.RemoteServerUrl;
                 var Make = Scpa as WebsitePanel.Setup.Actions.IInstallAction;
                 Make.Run(null);
             }
@@ -272,10 +456,6 @@ namespace WebsitePanel.WIXInstaller
 
                 Log.WriteStart("PreFillSettings");
 
-                TryApllyNewPassword(Ctx, "PI_SERVER_PASSWORD");
-                TryApllyNewPassword(Ctx, "PI_ESERVER_PASSWORD");
-                TryApllyNewPassword(Ctx, "PI_PORTAL_PASSWORD");
-
                 var WSP = Ctx["WSP_INSTALL_DIR"];
                 var DirList = new List<string>();
                 DirList.Add(WSP);
@@ -424,14 +604,14 @@ namespace WebsitePanel.WIXInstaller
                                     SetProperty(Ctx, "PI_SCHEDULER_CRYPTO_KEY", Ctx["PI_ESERVER_CRYPTO_KEY"]);
                                     ConnInfo = new SqlConnectionStringBuilder(EServerConnStr);
                                 }
-                                if(ConnInfo != null)
+                                if (ConnInfo != null)
                                 {
                                     SetProperty(Ctx, "PI_SCHEDULER_DB_SERVER", ConnInfo.DataSource);
                                     SetProperty(Ctx, "PI_SCHEDULER_DB_DATABASE", ConnInfo.InitialCatalog);
                                     SetProperty(Ctx, "PI_SCHEDULER_DB_LOGIN", ConnInfo.UserID);
                                     SetProperty(Ctx, "PI_SCHEDULER_DB_PASSWORD", ConnInfo.Password);
                                 }
-                                Ctx["COMPFOUND_SCHEDULER"] = HaveSchedulerService? YesNo.Yes : YesNo.No;
+                                Ctx["COMPFOUND_SCHEDULER"] = HaveSchedulerService ? YesNo.Yes : YesNo.No;
                             }
                             catch (Exception ex)
                             {
@@ -530,7 +710,7 @@ namespace WebsitePanel.WIXInstaller
                     InstallToolDelegate InstallTool = Tool.GetInstallTool();
                     if (InstallTool == null)
                         throw new ApplicationException("Install tool for copmonents is not found.");                    
-                    for (int i = 0; i < Components.Count; i ++)
+                    for (int i = 0; i < Components.Count; i++)
                     {
                         var Component = Components[i];
                         ProgressText(string.Format(Frmt, Component, i + 1, Components.Count));
@@ -716,6 +896,7 @@ namespace WebsitePanel.WIXInstaller
         [CustomAction]
         public static ActionResult ServerValidateADUI(Session session)
         {
+            PopUpDebugger();
             var Ctx = session;
             bool Valid = true;
             string Msg;
@@ -728,6 +909,7 @@ namespace WebsitePanel.WIXInstaller
         [CustomAction]
         public static ActionResult EServerValidateADUI(Session session)
         {
+            PopUpDebugger();
             var Ctx = session;
             bool Valid = true;
             string Msg;
@@ -740,6 +922,7 @@ namespace WebsitePanel.WIXInstaller
         [CustomAction]
         public static ActionResult PortalValidateADUI(Session session)
         {
+            PopUpDebugger();
             var Ctx = session;
             bool Valid = true;
             string Msg;
@@ -842,13 +1025,15 @@ namespace WebsitePanel.WIXInstaller
         [CustomAction]
         public static ActionResult CheckConnectionUI(Session session)
         {
+            PopUpDebugger();
+
             string Msg = default(string);
             string ConnStr = session["DB_AUTH"].Equals(SQL_AUTH_WINDOWS) ? GetConnectionString(session["DB_SERVER"], "master") :
                                                                            GetConnectionString(session["DB_SERVER"], "master", session["DB_LOGIN"], session["DB_PASSWORD"]);
             var Result = Adapter.CheckSql(new SetupVariables { InstallConnectionString = ConnStr }, out Msg) == CheckStatuses.Success;
             session["DB_CONN_CORRECT"] = Result ? YesNo.Yes : YesNo.No;
             session["DB_CONN"] = Result ? ConnStr : "";
-            session["DB_CONN_MSG"] = string.Format(Result? "Success. {0}" : "Error. {0}", Msg);
+            session["DB_CONN_MSG"] = string.Format(Result ? "Success. {0}" : "Error. {0}", Msg);
             return ActionResult.Success;
         }
         [CustomAction]
@@ -872,7 +1057,7 @@ namespace WebsitePanel.WIXInstaller
             var NetMsg = "Microsoft .NET {0} is {1}.";
             Action<string> ShowMsg = (string Text) =>
             {
-                using(var Rec = new Record(0))
+                using (var Rec = new Record(0))
                 {
                     Rec.SetString(0, Text);
                     session.Message(InstallMessage.Error, Rec);
@@ -1038,23 +1223,6 @@ namespace WebsitePanel.WIXInstaller
             string p2 = Ctx[Ns + "_PASSWORD_CONFIRM"];
             return PasswordValidateEqual(p1, p2, out Msg);
         }
-        internal static bool ValidateADDomainUI(Session Ctx, string Ns, out string Msg)
-        {
-            bool Result = default(bool);
-            bool check = Ctx[Ns + "_CREATE_AD"] == YesNo.Yes;
-            string name = Ctx[Ns + "_DOMAIN"];
-            if (check && string.IsNullOrWhiteSpace(name))
-            {
-                Result = false;
-                Msg = "The domain can't be empty.";
-            }
-            else
-            {
-                Result = true;
-                Msg = string.Empty;
-            }
-            return Result;
-        }
         internal static bool ValidateADLoginUI(Session Ctx, string Ns, out string Msg)
         {
             bool Result = default(bool);
@@ -1071,14 +1239,37 @@ namespace WebsitePanel.WIXInstaller
             }
             return Result;
         }
+        internal static bool ValidateCredentials(Session Ctx, string Ns, out string Msg)
+        {
+            try
+            {
+                if (Ctx[Ns + "_CREATENEWACCOUNT"] == "1")
+                {
+                    Msg = string.Empty;
+                    return true;
+                }
+                var domain = Ctx[Ns + "_DOMAIN"];
+                var name = Ctx[Ns + "_LOGIN"];
+                var pwd = Ctx[Ns + "_PASSWORD"];
+                var Result = CheckCredentials(domain, name, pwd);
+                Msg = Result ? string.Empty : "Please provide valid credentials.";
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                Log.WriteError("Error in credentials", ex);
+                Msg = ex.ToString();
+                return false;
+            }
+        }
         internal static bool ValidateADUI(Session Ctx, string Ns, out string Msg)
         {
             bool Result = true;
-            if (!ValidateADDomainUI(Ctx, Ns, out Msg))
-                Result = false;
-            else if (!ValidateADLoginUI(Ctx, Ns, out Msg))
+            if (!ValidateADLoginUI(Ctx, Ns, out Msg))
                 Result = false;
             else if (!ValidatePasswordUI(Ctx, Ns, out Msg))
+                Result = false;
+            else if (!ValidateCredentials(Ctx, Ns, out Msg))
                 Result = false;
             return Result;
         }
@@ -1232,6 +1423,54 @@ namespace WebsitePanel.WIXInstaller
             if (encryptionNode != null)
                 bool.TryParse(encryptionNode.GetAttribute("value"), out encryptionEnabled);
             return encryptionEnabled;
+        }
+
+        private static bool CheckCredentials(string domain, string name, string pwd)
+        {
+            const int LogonFailure = 0x31;
+            if (string.IsNullOrWhiteSpace(domain)) // Fastest way to validate on local machine.
+            {
+                using (var Context = new PrincipalContext(ContextType.Machine))
+                {
+                    return Context.ValidateCredentials(name, pwd);
+                }
+            }
+            else // On AD domain it's prevents auth with previous old password.
+            {
+                var Creds = new NetworkCredential(name, pwd, domain);
+                var Ident = new LdapDirectoryIdentifier(domain);
+                using (var Conn = new LdapConnection(Ident, Creds, AuthType.Kerberos))
+                {
+                    Conn.SessionOptions.Sealing = true;
+                    Conn.SessionOptions.Signing = true;
+                    try
+                    {
+                        Conn.Bind();
+                    }
+                    catch (LdapException ex)
+                    {
+                        if (ex.ErrorCode == LogonFailure)
+                            return false;
+                        throw;
+                    }
+                }
+                return true;
+            }
+        }
+
+        private static void NormalizeLoginUI(Session Ctx, string Ns)
+        {
+            string Property = string.Format("PI_{0}_LOGIN", Ns);
+            string Login = Ctx[Property];
+            if (Login.Contains(@"\"))
+            {
+                Login = Login.Split(new string[] { @"\" }, StringSplitOptions.RemoveEmptyEntries).Last();
+            }
+            else if (Login.Contains(@"@"))
+            {
+                Login = Login.Split(new string[] { @"@" }, StringSplitOptions.RemoveEmptyEntries).First();
+            }
+            Ctx[Property] = Login;
         }
     }
     public static class SessionExtension

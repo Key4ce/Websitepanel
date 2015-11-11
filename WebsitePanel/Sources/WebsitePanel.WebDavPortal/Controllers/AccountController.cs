@@ -4,7 +4,6 @@ using System.Net;
 using System.Web.Mvc;
 using System.Web.Routing;
 using AutoMapper;
-using log4net;
 using Microsoft.Web.Services3.Addressing;
 using WebsitePanel.Providers.HostedSolution;
 using WebsitePanel.WebDav.Core.Config;
@@ -21,6 +20,7 @@ using WebsitePanel.WebDavPortal.Models.Common.Enums;
 using WebsitePanel.WebDavPortal.UI.Routes;
 using WebsitePanel.WebDav.Core.Interfaces.Security;
 using WebsitePanel.WebDav.Core;
+using WebsitePanel.Server.Utils;
 
 namespace WebsitePanel.WebDavPortal.Controllers
 {
@@ -30,21 +30,20 @@ namespace WebsitePanel.WebDavPortal.Controllers
         private readonly ICryptography _cryptography;
         private readonly IAuthenticationService _authenticationService;
         private readonly ISmsAuthenticationService _smsAuthService;
-        private readonly ILog Log;
 
         public AccountController(ICryptography cryptography, IAuthenticationService authenticationService, ISmsAuthenticationService smsAuthService)
         {
             _cryptography = cryptography;
             _authenticationService = authenticationService;
-            _smsAuthService = smsAuthService;
-
-            Log = LogManager.GetLogger(this.GetType());
+            _smsAuthService = smsAuthService;        
         }
         
         [HttpGet]
         [AllowAnonymous]
         public ActionResult Login()
         {
+            Log.WriteStart("Login");
+
             if (WspContext.User != null && WspContext.User.Identity.IsAuthenticated)
             {
                 return RedirectToRoute(FileSystemRouteNames.ShowContentPath, new { org = WspContext.User.OrganizationId });
@@ -60,6 +59,8 @@ namespace WebsitePanel.WebDavPortal.Controllers
 
             }
 
+            Log.WriteEnd("Login");
+
             return View(model);
         }
 
@@ -67,6 +68,8 @@ namespace WebsitePanel.WebDavPortal.Controllers
         [AllowAnonymous]
         public ActionResult Login(AccountModel model)
         {
+            Log.WriteStart("Login with Model");
+
             var user = _authenticationService.LogIn(model.Login, model.Password);
             
             ViewBag.LdapIsAuthentication = user != null;
@@ -77,6 +80,8 @@ namespace WebsitePanel.WebDavPortal.Controllers
 
                 return RedirectToRoute(FileSystemRouteNames.ShowContentPath, new { org = WspContext.User.OrganizationId });
             }
+
+            Log.WriteEnd("Login with Model");
 
             return View(new AccountModel { LdapError = "The user name or password is incorrect" });
         }

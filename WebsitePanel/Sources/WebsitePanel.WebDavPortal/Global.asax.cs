@@ -19,6 +19,7 @@ using WebsitePanel.WebDavPortal.CustomAttributes;
 using WebsitePanel.WebDavPortal.DependencyInjection;
 using WebsitePanel.WebDavPortal.HttpHandlers;
 using WebsitePanel.WebDavPortal.Mapping;
+using WebsitePanel.Server.Utils;
 
 namespace WebsitePanel.WebDavPortal
 {
@@ -26,6 +27,8 @@ namespace WebsitePanel.WebDavPortal
     {
         protected void Application_Start()
         {
+            Log.WriteStart("Application_Start");
+
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             WebApiConfig.Register(GlobalConfiguration.Configuration);
@@ -36,14 +39,14 @@ namespace WebsitePanel.WebDavPortal
             DependencyResolver.SetResolver(new NinjectDependecyResolver());
 
             AutoMapperPortalConfiguration.Configure();
-
+            
             Mapper.AssertConfigurationIsValid();
-
-            log4net.Config.XmlConfigurator.Configure();
 
             DataAnnotationsModelValidatorProvider.RegisterAdapter(
                typeof(PhoneNumberAttribute),
                typeof(RegularExpressionAttributeAdapter));
+
+            Log.WriteEnd("Application_Start");
         }
 
         protected void Application_Error(object sender, EventArgs e)
@@ -80,31 +83,51 @@ namespace WebsitePanel.WebDavPortal
 
         protected void Application_PostAuthenticateRequest(Object sender, EventArgs e)
         {
+            Log.WriteStart("Application_PostAuthenticateRequest");
+
             if (!IsOwaRequest())
             {
+                Log.WriteInfo("Try get HttpContext ...");
                 var contextWrapper = new HttpContextWrapper(Context);
+
+                Log.WriteInfo("Try get Auth-Cookie ...");
                 HttpCookie authCookie = Request.Cookies[FormsAuthentication.FormsCookieName];
 
+                Log.WriteInfo("Try get Auth-Servive ...");
                 var authService = DependencyResolver.Current.GetService<IAuthenticationService>();
+
+                Log.WriteInfo("Try get Crypto-Service ...");
                 var cryptography = DependencyResolver.Current.GetService<ICryptography>();
 
                 if (authCookie != null)
                 {
+                    Log.WriteInfo("Found Auth-Cookie!");
+                    Log.WriteInfo("Try to Decrpyt ...");
                     FormsAuthenticationTicket authTicket = FormsAuthentication.Decrypt(authCookie.Value);
 
+                    Log.WriteInfo("Try to get UserData from Auth-Cookie");
                     var serializer = new JavaScriptSerializer();
-
                     var principalSerialized = serializer.Deserialize<WspPrincipal>(authTicket.UserData);
 
-                    authService.LogIn(principalSerialized.Login,
-                        cryptography.Decrypt(principalSerialized.EncryptedPassword));
+                    Log.WriteInfo("Try to Login ...");
+                    authService.LogIn(principalSerialized.Login, cryptography.Decrypt(principalSerialized.EncryptedPassword));
 
                     if (!contextWrapper.Request.IsAjaxRequest())
                     {
                         SetAuthenticationExpirationTicket();
                     }
                 }
+                else
+                {
+                    Log.WriteWarning("Auth-Cookie is null");
+                }
             }
+            else
+            {
+                Log.WriteInfo("Is OWA Request!");
+            }
+
+            Log.WriteEnd("Application_PostAuthenticateRequest");
         }
 
 
@@ -116,6 +139,8 @@ namespace WebsitePanel.WebDavPortal
 
         public static void SetAuthenticationExpirationTicket()
         {
+            Log.WriteStart("SetAuthenticationExpirationTicket");
+
             var expirationDateTimeInUtc = DateTime.UtcNow.AddMinutes(FormsAuthentication.Timeout.TotalMinutes).AddSeconds(1);
             var authenticationExpirationTicketCookie = new HttpCookie(WebDavAppConfigManager.Instance.AuthTimeoutCookieName);
             
@@ -124,6 +149,8 @@ namespace WebsitePanel.WebDavPortal
             authenticationExpirationTicketCookie.Secure = FormsAuthentication.RequireSSL;
 
             HttpContext.Current.Response.Cookies.Add(authenticationExpirationTicketCookie);
+
+            Log.WriteEnd("SetAuthenticationExpirationTicket");
         }
     }
 }

@@ -31,7 +31,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Management;
-
+using System.Security.Principal;
 
 namespace WebsitePanel.Server.Utils
 {
@@ -421,12 +421,23 @@ namespace WebsitePanel.Server.Utils
 
             ManagementClass objMC = new ManagementClass("Win32_ServerFeature");
             ManagementObjectCollection objMOC = objMC.GetInstances();
+
+            // 01.09.2015 roland.breitschaft@x-company.de
+            // Problem: Method not work on German Systems, because the searched Feature-Name does not exist
+            // Fix: Add German String for FSRM-Feature            
+
+            //foreach (ManagementObject objMO in objMOC)
+            //    if (objMO.Properties["Name"].Value.ToString().ToLower().Contains("file server resource manager"))
+            //        return true;
             foreach (ManagementObject objMO in objMOC)
-                if (objMO.Properties["Name"].Value.ToString().ToLower().Contains("file server resource manager"))
+            {
+                var name = objMO.Properties["Name"].Value.ToString().ToLower();
+                if (name.Contains("file server resource manager")
+                    || name.Contains("ressourcen-manager für dateiserver"))
                     return true;
+            }
 
             return false;
-
         }
 	}
 }

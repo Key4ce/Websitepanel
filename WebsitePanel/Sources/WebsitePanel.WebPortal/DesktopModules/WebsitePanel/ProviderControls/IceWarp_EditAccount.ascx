@@ -3,11 +3,6 @@
 <%@ Register TagPrefix="wsp" TagName="Calendar" Src="../UserControls/CalendarControl.ascx" %>
 
 <table width="100%">
-    <tr runat="server" id="passwordRow">
-        <td colspan="2">
-            <asp:CheckBox runat="server" meta:resourcekey="cbChangePassword" ID="cbChangePassword" Text="Change password" />
-        </td>
-    </tr> 
     <tr>
         <td colspan="2">
             <asp:CheckBox runat="server" meta:resourcekey="cbDomainAdmin" ID="cbDomainAdmin" Text="Domain Administrator" />
