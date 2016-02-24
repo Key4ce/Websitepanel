@@ -64,7 +64,7 @@
 
 	<PropertyGroup Label="WebPlatformFeed">
 		<!-- URI where to locate the installer's distributive online -->
-		<InstallerRemoteUri>http://installer.websitepanel-support.com/files/$(Version)/WebsitePanelInstaller-$(Version)-webpi.msi</InstallerRemoteUri>
+		<InstallerRemoteUri>http://www.websitepanel.net/files/$(Version)/WebsitePanelInstaller-$(Version)-webpi.msi</InstallerRemoteUri>
 	</PropertyGroup>
 
 	<Target Name="RestorePackages">

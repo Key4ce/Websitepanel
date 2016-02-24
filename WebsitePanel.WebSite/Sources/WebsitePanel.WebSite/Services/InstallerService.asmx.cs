@@ -38,7 +38,7 @@ namespace WebsitePanel.WebSite.Services
     /// <summary>
     /// Summary description for InstallerService
     /// </summary>
-    [WebService(Namespace = "http://installer.websitepanel-support.com/services")]
+    [WebService(Namespace = "http://websitepanel.net/services")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
     // To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line. 

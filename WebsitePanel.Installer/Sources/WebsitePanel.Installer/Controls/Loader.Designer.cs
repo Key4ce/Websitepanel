@@ -122,7 +122,7 @@ namespace WebsitePanel.Installer.Controls
 			this.Name = "Loader";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Key4ce WebsitePanel Installer";
+			this.Text = "WebsitePanel Installer";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnLoaderFormClosing);
 			this.grpFiles.ResumeLayout(false);
 			this.ResumeLayout(false);

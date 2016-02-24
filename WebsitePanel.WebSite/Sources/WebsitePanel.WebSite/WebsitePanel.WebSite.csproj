@@ -67,9 +67,6 @@
     <Reference Include="System.Web.Mobile" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\ProductReleasesFeed-2.1.xml">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Data\ProductReleasesFeed-dev.xml" />
     <Content Include="Data\ProductReleasesFeed.Beta.xml">
       <SubType>Designer</SubType>

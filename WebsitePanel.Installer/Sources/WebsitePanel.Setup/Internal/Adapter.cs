@@ -4419,7 +4419,7 @@ namespace WebsitePanel.Setup.Internal
         protected override void ProcessError(Exception ex)
         {
             var Msg = "An unexpected error has occurred. We apologize for this inconvenience.\n" +
-                "Please contact Technical Support at support@websitepanel-support.com.\n\n" +
+                "Please contact Technical Support at info@websitepanel.net.\n\n" +
                 "Make sure you include a copy of the Installer.log file from the\n" +
                 "WebsitePanel Installer home directory.";
             Log.WriteError(Msg, ex);

@@ -148,10 +148,10 @@ namespace WebsitePanel.Installer
 		{
 			Log.WriteError("Fatal error occured.", e.Exception);
 			string message = "A fatal error has occurred. We apologize for this inconvenience.\n" +
-                "Please contact Technical Support at support@websitepanel-support.com.\n\n" +
+				"Please contact Technical Support at info@websitepanel.net.\n\n" +
 				"Make sure you include a copy of the Installer.log file from the\n" +
 				"WebsitePanel Installer home directory.";
-			MessageBox.Show(message, "Key4ce WebsitePanel Installer", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(message, "WebsitePanel Installer", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			Application.Exit();
 		}
 
@@ -162,17 +162,17 @@ namespace WebsitePanel.Installer
 		{
 			Log.WriteError("Fatal error occured.", (Exception)e.ExceptionObject);
 			string message = "A fatal error has occurred. We apologize for this inconvenience.\n" +
-                "Please contact Technical Support at support@websitepanel-support.com.\n\n" +
+				"Please contact Technical Support at info@websitepanel.net.\n\n" +
 				"Make sure you include a copy of the Installer.log file from the\n" +
 				"WebsitePanel Installer home directory.";
-			MessageBox.Show(message, "Key4ce WebsitePanel Installer", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(message, "WebsitePanel Installer", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			Process.GetCurrentProcess().Kill();
 		}
 
 		private static void ShowSecurityError()
 		{
 			string message = "You do not have the appropriate permissions to perform this operation. Make sure you are running the application from the local disk and you have local system administrator privileges.";
-			MessageBox.Show(message, "Key4ce WebsitePanel Installer", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(message, "WebsitePanel Installer", MessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
 
 		/// <summary>
