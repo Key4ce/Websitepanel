@@ -4,29 +4,29 @@
 
   <title>WebsitePanel Installer v4.0 Feed</title>
   <updated>2012-05-02T00:00:00Z</updated>
-  <link href="http://www.websitepanel.net/WebPI/1.2.1/WebsitePanelFeed.xml" />
+  <link href="http://installer.websitepanel-support.com/WebPI/1.2.1/WebsitePanelFeed.xml" />
   <author>
     <name>Outercurve Foundation</name>
-    <uri>http://www.websitepanel.net/</uri>
+    <uri>http://installer.websitepanel-support.com/</uri>
   </author>
-  <id>http://www.websitepanel.net/web/webpi/1.2.1/WebsitePanelList.xml</id>
+  <id>http://installer.websitepanel-support.com/web/webpi/1.2.1/WebsitePanelList.xml</id>
 
   <entry>
       <productId>WebsitePanel121</productId>
       <title resourceName="Entry_WebsitePanel_Title">WebsitePanel 1.2.1</title>
       <version>1.2.1</version>
       <summary resourceName="Entry_WebsitePanel_Summary">WebsitePanel is an easy to use control panel for Windows hosting. It allows you to manage multiple servers, it has a robust, scalable and secure architecture. With WebsitePanel you can easily manage all your web sites, FTP accounts, databases and other resources from a single place.</summary>
-      <id>http://www.websitepanel.net/web/webpi/wsp/121</id>
+      <id>http://installer.websitepanel-support.com/web/webpi/wsp/121</id>
       <updated>2012-05-02T00:00:00Z</updated>
       <longSummary resourceName="Entry_WebsitePanel_LongSummary">WebsitePanel is an easy to use control panel for Windows hosting. It allows you to manage multiple servers, it has a robust, scalable and secure architecture. With WebsitePanel you can easily manage all your web sites, FTP accounts, databases and other resources from a single place.</longSummary>
       <published>2011-07-15T17:40:00Z</published>
-      <link href="http://www.websitepanel.net" />
+      <link href="http://installer.websitepanel-support.com" />
       <images>
-        <icon>http://www.websitepanel.net/content/images/wsp_screenshot.png</icon>
+        <icon>http://installer.websitepanel-support.com/content/images/wsp_screenshot.png</icon>
       </images>
       <author>
         <name>Outercurve Foundation</name>
-        <uri>http://www.websitepanel.net/Contact-Us</uri>
+        <uri>http://installer.websitepanel-support.com/Contact-Us</uri>
       </author>
 
       <keywords>
@@ -85,7 +85,7 @@
 
       <terms>
         <termsText resourceName="Terms_WebsitePanel_Text">THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</termsText>
-        <termsLink>http://www.websitepanel.net/License</termsLink>
+        <termsLink>http://installer.websitepanel-support.com/License</termsLink>
         <termsLinkText resourceName="Terms_WebsitePanel_LinkText">Terms of Use</termsLinkText>
       </terms>
 
@@ -120,7 +120,7 @@
               </osTypes>
             </os>
           </osList>
-          <eulaURL>http://www.websitepanel.net/License</eulaURL>
+          <eulaURL>http://installer.websitepanel-support.com/License</eulaURL>
           <installerFile>
             <!-- size in KBs -->
             <fileSize>1104</fileSize>
@@ -214,7 +214,7 @@
               </osTypes>
             </os>
           </osList>
-          <eulaURL>http://www.websitepanel.net/License</eulaURL>
+          <eulaURL>http://installer.websitepanel-support.com/License</eulaURL>
           <installerFile>
             <!-- size in KBs -->
             <fileSize>1104</fileSize>

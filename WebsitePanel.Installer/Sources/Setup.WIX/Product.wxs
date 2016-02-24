@@ -4,14 +4,14 @@
   <?include Config.wxi?>
   <?define VERSION="!(bind.FileVersion.WebsitePanel.Installer.exe)"?>
   
-  <Product Id="*" Name="WebsitePanel Installer" Language="1033" Version="$(var.VERSION)" Manufacturer="Outercurve Foundation" UpgradeCode="629ccd5c-1f6d-4168-bbe6-01c69e232f43">
+  <Product Id="*" Name="Key4ce WebsitePanel Installer" Language="1033" Version="$(var.VERSION)" Manufacturer="Outercurve Foundation" UpgradeCode="629ccd5c-1f6d-4168-bbe6-01c69e232f43">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     
     <MediaTemplate EmbedCab="yes" />
      
-		<Feature Id="ProductFeature" Title="WebsitePanel Installer" Level="1">
+		<Feature Id="ProductFeature" Title="Key4ce WebsitePanel Installer" Level="1">
       <ComponentRef Id="ProductFiles" />
       <ComponentRef Id="ApplicationShortcut" />
 		</Feature>
@@ -58,8 +58,8 @@
       <DirectoryRef Id="ApplicationProgramsFolder"> 
        <Component Id="ApplicationShortcut" Guid="2135C88C-E14C-4280-B553-2D8B41468F95">
         <Shortcut Id="ApplicationStartMenuShortcut"
-          Name="WebsitePanel Installer"
-          Description="WebsitePanel Installer"
+          Name="Key4ce WebsitePanel Installer"
+          Description="Key4ce WebsitePanel Installer"
           Target="[INSTALLFOLDER]WebsitePanel.Installer.exe"
           WorkingDirectory="INSTALLFOLDER"/>
         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
