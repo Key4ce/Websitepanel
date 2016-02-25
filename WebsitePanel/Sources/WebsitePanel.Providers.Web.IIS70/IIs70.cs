@@ -559,10 +559,10 @@ namespace WebsitePanel.Providers.Web
 
 			// Fix. Import web site that runs under NETWORK_SERVICE identity fails.
 			// WebsitePanel cannot create anonymous account.
-			/*if (!user.Name.Contains(site.Name.Replace(".", "")))
+			if (!user.Name.Contains(site.Name.Replace(".", "")))
 			{
 				user.Name = user.FullName = site.Name.Replace(".", "") + "_web";
-			}*/
+			}
 
 			//check is user name less than 20 symbols (Windows name length restriction)
 			if (user.Name.Length > 20)
