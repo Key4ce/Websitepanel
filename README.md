@@ -1,7 +1,7 @@
 We have moved to SolidCP,
 Many more commits and fixes have been made there since this WebsitePanel 2.1.0.944 source.
 
-Please visit: https://solid.com for more information
+Please visit: https://solidcp.com for more information
 
 # Websitepanel
 
