@@ -4,12 +4,12 @@
 	<version>1.0.1</version>
 	<updated>2011-01-12T15:09:00Z</updated>
 	<title>WebsitePanel 1.1.0</title>
-	<link href="http://www.websitepanel.net/WebPI/2.0/WebsitePanelFeed.xml" />
+	<link href="http://installer.websitepanel-support.net/WebPI/2.0/WebsitePanelFeed.xml" />
 	<author>
-		<name>SMB SAAS Systems</name>
-		<uri>http://www.websitepanel.net</uri>
+		<name>WebsitePanel-Support.net</name>
+		<uri>https://www.websitepanel-support.net</uri>
 	</author>
-	<id>http://www.websitepanel.net/WebPI/2.0/WebsitePanelFeed.xml</id>
+	<id>http://installer.websitepanel-support.net/WebPI/2.0/WebsitePanelFeed.xml</id>
 
 	<entry>
 		<productId>WebsitePanel</productId>
@@ -20,11 +20,11 @@
 
 		<version>1.1.0</version>
 		<images>
-			<icon>http://www.websitepanel.net/content/images/wsp_screenshot.png</icon>
+			<icon>http://installer.websitepanel-support.net/content/images/wsp_screenshot.png</icon>
 		</images>
 		<author>
-			<name>SMB SAAS Systems</name>
-			<uri>http://www.websitepanel.net/Contact-Us</uri>
+			<name>WebsitePanel-Support.net</name>
+			<uri>https://www.websitepanel-support.net/Contact</uri>
 		</author>
 		<published>2010-12-30T17:40:00Z</published>
 
@@ -61,7 +61,7 @@
 
 		<terms>
 			<termsText resourceName="Terms_WebsitePanel_Text">THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</termsText>
-			<termsLink>http://www.websitepanel.net/License</termsLink>
+			<termsLink>https://www.websitepanel-support.net/License</termsLink>
 			<termsLinkText resourceName="Terms_WebsitePanel_LinkText">Terms of Use</termsLinkText>
 		</terms>
 
@@ -96,11 +96,11 @@
 						</osTypes>
 					</os>
 				</osList>
-				<eulaURL>http://www.websitepanel.net/License</eulaURL>
+				<eulaURL>https://www.websitepanel-support.net/License</eulaURL>
 				<installerFile>
 					<!-- size in KBs -->
 					<fileSize>1059</fileSize>
-					<installerURL>http://www.websitepanel.net/Files/1.1.0/release/WebsitePanelInstaller11.msi</installerURL>
+					<installerURL>http://installer.websitepanel-support.net/Files/1.1.0/release/WebsitePanelInstaller11.msi</installerURL>
 					<sha1>0F6EAFE073590A9BFC190C72113B4B73A3A375F7</sha1>
 				</installerFile>
 				<installCommands>
@@ -188,11 +188,11 @@
 						</osTypes>
 					</os>
 				</osList>
-				<eulaURL>http://www.websitepanel.net/License</eulaURL>
+				<eulaURL>https://www.websitepanel-support.net/License</eulaURL>
 				<installerFile>
 					<!-- size in KBs -->
 					<fileSize>1059</fileSize>
-					<installerURL>http://www.websitepanel.net/Files/1.1.0/release/WebsitePanelInstaller11.msi</installerURL>
+					<installerURL>http://installer.websitepanel-support.net/Files/1.1.0/release/WebsitePanelInstaller11.msi</installerURL>
 					<sha1>0F6EAFE073590A9BFC190C72113B4B73A3A375F7</sha1>
 				</installerFile>
 				<installCommands>
