@@ -31,7 +31,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Product.wxs" />
-	<Compile Include="..\..\..\WebsitePanel\Build\$(Configuration)\WiXInstaller\ComponentsFiles\SchedulerServiceFiles.wxs" />
+    <Compile Include="..\..\..\WebsitePanel\Build\$(Configuration)\WiXInstaller\ComponentsFiles\SchedulerServiceFiles.wxs">
+      <Link>SchedulerServiceFiles.wxs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Config.wxi" />

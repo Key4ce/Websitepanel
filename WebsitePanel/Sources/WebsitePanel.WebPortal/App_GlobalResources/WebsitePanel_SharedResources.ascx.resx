@@ -1264,7 +1264,7 @@
     <value>This error means that for some reason the hosting space meta-information is not synchronized with service resources. You should immediately send the report about this error to your host.</value>
   </data>
   <data name="WarningDescription.106" xml:space="preserve">
-    <value>When user account is in demo mode the majority of operations are disabled, especially those ones that modify or delete records. You are welcome to ask your questions or place comments about this demo on  &lt;a href="http://forum.websitepanel.net" target="_blank"&gt;WebsitePanel Support Forum&lt;/a&gt;</value>
+    <value>When user account is in demo mode the majority of operations are disabled, especially those ones that modify or delete records. You are welcome to ask your questions or place comments about this demo on  &lt;a href="https://websitepanel-support.net/forum" target="_blank"&gt;WebsitePanel Support Forum&lt;/a&gt;</value>
   </data>
   <data name="ErrorDescription.501" xml:space="preserve">
     <value>This message means you are trying to add a domain that is a sub-domain of the domain belonging to other user. For example, some user have registered "domain.com" domain and you are trying to create  "sub.domain.com". If that "parent" domain is yours you should set "Allow Sub-domains" checkbox for it.</value>

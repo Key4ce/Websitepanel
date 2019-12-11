@@ -48,7 +48,7 @@ namespace WebsitePanel.Installer.Core
 			}
 			else
 			{
-				webService.Url = "http://www.websitepanel.net/Services/InstallerService-2.1.asmx";
+				webService.Url = "http://installer.websitepanel-support.net/Services/InstallerService-2.1.asmx";
 			}
 
 			// check if we need to add a proxy to access Internet

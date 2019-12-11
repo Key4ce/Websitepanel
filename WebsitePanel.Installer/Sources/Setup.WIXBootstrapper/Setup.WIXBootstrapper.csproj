@@ -73,7 +73,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Websitepanel.msi" />
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>

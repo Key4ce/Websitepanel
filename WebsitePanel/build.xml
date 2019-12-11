@@ -1,9 +1,9 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
 	<PropertyGroup>
-		<Version>2.1.0</Version>
+		<Version>$(Version)</Version>
 		<FileVersion>$(BUILD_NUMBER)</FileVersion>
 		<VersionLabel>$(BUILD_NUMBER)</VersionLabel>
-		<ReleaseDate>2012-01-25</ReleaseDate>
+		<ReleaseDate>2019-12-11</ReleaseDate>
 		<BuildConfiguration></BuildConfiguration>
 		<RootFolder>..</RootFolder>
 		<TrunkFolder>$(RootFolder)\WebsitePanel</TrunkFolder>
@@ -64,7 +64,7 @@
 
 	<PropertyGroup Label="WebPlatformFeed">
 		<!-- URI where to locate the installer's distributive online -->
-		<InstallerRemoteUri>http://www.websitepanel.net/files/$(Version)/WebsitePanelInstaller-$(Version)-webpi.msi</InstallerRemoteUri>
+		<InstallerRemoteUri>http://installer.websitepanel-support.net/files/$(Version)/WebsitePanelInstaller-$(Version)-webpi.msi</InstallerRemoteUri>
 	</PropertyGroup>
 
 	<Target Name="RestorePackages">
@@ -73,12 +73,12 @@
 	</Target>
 
 	<Target Name="GenerateBuildVersionFilesInstaller" DependsOnTargets="RestorePackages">
-		<AssemblyInfo CodeLanguage="CS" OutputFile="$(RootFolder)\WebsitePanel.Installer\Sources\VersionInfo.cs" AssemblyCompany="Outercurve Foundation" AssemblyCopyright="Copyright © 2015 Outercurve Foundation." AssemblyVersion="$(VersionLabel)" AssemblyFileVersion="$(FileVersion)" AssemblyInformationalVersion="$(Version)" />
+		<AssemblyInfo CodeLanguage="CS" OutputFile="$(RootFolder)\WebsitePanel.Installer\Sources\VersionInfo.cs" AssemblyCompany="WebsitePanel-Support.net" AssemblyCopyright="Copyright © 2019 WebsitePanel-Support.net." AssemblyVersion="$(VersionLabel)" AssemblyFileVersion="$(FileVersion)" AssemblyInformationalVersion="$(Version)" />
 	</Target>
 
 	<Target Name="GenerateBuildVersionFiles" DependsOnTargets="GenerateBuildVersionFilesInstaller">
-		<AssemblyInfo CodeLanguage="CS" OutputFile="$(TrunkFolder)\Sources\VersionInfo.cs" AssemblyCompany="Outercurve Foundation" AssemblyCopyright="Copyright © 2015 Outercurve Foundation." AssemblyVersion="$(VersionLabel)" AssemblyFileVersion="$(FileVersion)" AssemblyInformationalVersion="$(Version)" />
-		<AssemblyInfo CodeLanguage="VB" OutputFile="$(TrunkFolder)\Sources\VersionInfo.vb" AssemblyCompany="Outercurve Foundation" AssemblyCopyright="Copyright © 2015 Outercurve Foundation." AssemblyVersion="$(VersionLabel)" AssemblyFileVersion="$(FileVersion)" AssemblyInformationalVersion="$(Version)" />
+		<AssemblyInfo CodeLanguage="CS" OutputFile="$(TrunkFolder)\Sources\VersionInfo.cs" AssemblyCompany="WebsitePanel-Support.net" AssemblyCopyright="Copyright © 2019 WebsitePanel-Support.net." AssemblyVersion="$(VersionLabel)" AssemblyFileVersion="$(FileVersion)" AssemblyInformationalVersion="$(Version)" />
+		<AssemblyInfo CodeLanguage="VB" OutputFile="$(TrunkFolder)\Sources\VersionInfo.vb" AssemblyCompany="WebsitePanel-Support.net" AssemblyCopyright="Copyright © 2019 WebsitePanel-Support.net." AssemblyVersion="$(VersionLabel)" AssemblyFileVersion="$(FileVersion)" AssemblyInformationalVersion="$(Version)" />
 	</Target>
 
 	<Target Name="CompileSources" DependsOnTargets="GenerateBuildVersionFiles">
@@ -367,7 +367,6 @@
         <Exec Command='"$(WIX)bin\heat.exe" dir $(EnterpriseServerBuild) -o $(WiXInstallerBuild)\ComponentsFiles\EnterpriseServerFiles.wxs -gg -sreg -srd -var wix.BUILDESPATH -cg EnterpriseServerFiles -dr PI_ESERVER_INSTALL_DIR' />
         <Exec Command='"$(WIX)bin\heat.exe" dir $(ServerBuild) -o $(WiXInstallerBuild)\ComponentsFiles\ServerFiles.wxs -gg -sreg -srd -var wix.BUILDSPATH -cg ServerFiles -dr PI_SERVER_INSTALL_DIR' />
         <Exec Command='"$(WIX)bin\heat.exe" dir $(PortalBuild) -o $(WiXInstallerBuild)\ComponentsFiles\PortalFiles.wxs -gg -sreg -srd -var wix.BUILDPPATH -cg PortalFiles -dr PI_PORTAL_INSTALL_DIR' />
-		<Exec Command='"$(WIX)bin\heat.exe" dir $(SchedulerServiceBuild) -o $(WiXInstallerBuild)\ComponentsFiles\SchedulerServiceFiles.wxs -gg -sreg -srd -var wix.BUILDSRVPATH -cg SchedulerServiceFiles -dr PI_SCHEDULER_INSTALL_DIR' />
         <Exec Command='"$(WIX)bin\heat.exe" dir $(WebDavPortalBuild) -o $(WiXInstallerBuild)\ComponentsFiles\WebDavPortalFiles.wxs -gg -sreg -srd -var wix.BUILDWDPPATH -cg WebDavPortalFiles -dr PI_WDPORTAL_INSTALL_DIR' />
 
 		<MSBuild Projects="$(RootFolder)\WebsitePanel.Installer\Sources\Setup.WIX\Setup.Wix.wixproj" Properties="Configuration=$(BuildConfiguration);DefineSolutionProperties=false">
@@ -378,11 +377,6 @@
 
 		<MSBuild Projects="$(RootFolder)\WebsitePanel.Installer\Sources\WebsitePanel.SchedulerServiceInstaller\WebsitePanel.SchedulerServiceInstaller.csproj" Properties="Configuration=$(BuildConfiguration);DefineSolutionProperties=false"/>
 
-		<MSBuild Projects="$(RootFolder)\WebsitePanel.Installer\Sources\Setup.SchedulerService\Setup.SchedulerService.wixproj" Properties="Configuration=$(BuildConfiguration);DefineSolutionProperties=false">
-			<Output
-                TaskParameter="TargetOutputs"
-                ItemName="WebsitePanelInstallerMsi" />
-		</MSBuild>
 		<Copy SourceFiles="@(WebsitePanelInstallerMsi)" DestinationFolder="$(DeployFolder)\%(RecursiveDir)" />
 		</Target>
 
@@ -686,25 +680,7 @@
     <TokenReplace Path="C:\Project\Target.config" Token="$MyToken$" Replacement="MyValue"/>
   </Target>
 
-    <Target Name="CreateStandaloneFullMsi" DependsOnTargets="CreateSetupDLL">
-
-        <Copy SourceFiles="$(TrunkFolder)\Database\install_db.sql" DestinationFiles="$(DatabaseFolder)\wix_install_db.sql"  />
-		<Copy SourceFiles="$(UpdateFolder)\update_db.sql" DestinationFiles="$(DatabaseFolder)\wix_update_db.sql" />
-
-        <RegExpReplace Path="$(DatabaseFolder)\wix_install_db.sql" Pattern="USE \[\${install\.database}\]" Replacement="-- WiX" />
-        <RegExpReplace Path="$(DatabaseFolder)\wix_update_db.sql" Pattern="USE \[\${install\.database}\]" Replacement="-- WiX" />
-        <MSBuild Projects='$(RootFolder)\WebsitePanel.Installer\Sources\WebsitePanel.WIXInstaller\WebsitePanel.WIXInstaller.csproj' Properties='Configuration=$(BuildConfiguration)' Targets='Build' />
-        <MSBuild Projects='$(RootFolder)\WebsitePanel.Installer\Sources\Setup.WIXInstaller\Setup.WIXInstaller.wixproj' Properties='Configuration=$(BuildConfiguration)' Targets='Build'>
-           <Output TaskParameter="TargetOutputs" ItemName="StandaloneFullMsi" />
-        </MSBuild>
-		<Copy SourceFiles="@(StandaloneFullMsi)" DestinationFolder="$(DeployFolder)\%(RecursiveDir)" />
-		<Delete Files="$(RootFolder)\Websitepanel.Installer\Sources\Setup.WIXBootstrapper\Websitepanel.msi"/>
-		<Copy SourceFiles="@(StandaloneFullMsi)" DestinationFolder="$(RootFolder)\Websitepanel.Installer\Sources\Setup.WIXBootstrapper" />
-
-
-    </Target>
-
-	<Target Name="CreateStandaloneBootstrapper" DependsOnTargets="CreateStandaloneFullMsi">
+	<Target Name="CreateStandaloneBootstrapper" DependsOnTargets="CreateSetupDLL">
         <MSBuild Projects='$(RootFolder)\WebsitePanel.Installer\Sources\Setup.WIXBootstrapper\Setup.WIXBootstrapper.csproj' Properties='Configuration=$(BuildConfiguration)' Targets='Build'>
            <Output TaskParameter="TargetOutputs" ItemName="StandaloneBootstrapper" />
         </MSBuild>

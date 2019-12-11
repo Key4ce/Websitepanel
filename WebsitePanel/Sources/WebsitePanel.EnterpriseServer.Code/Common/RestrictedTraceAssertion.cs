@@ -1,4 +1,10 @@
-﻿// Copyright (c) 2015, Outercurve Foundation.
+// Copyright (c) 2019, WebsitePanel-Support.net.
+// Distributed by websitepanel-support.net
+// Build and fixed by Key4ce - IT Professionals
+// https://www.key4ce.com
+// 
+// Original source:
+// Copyright (c) 2015, Outercurve Foundation.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -25,7 +31,6 @@
 // ANY  THEORY  OF  LIABILITY,  WHETHER  IN  CONTRACT,  STRICT  LIABILITY,  OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE)  ARISING  IN  ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 
 using System;
 using System.Data;

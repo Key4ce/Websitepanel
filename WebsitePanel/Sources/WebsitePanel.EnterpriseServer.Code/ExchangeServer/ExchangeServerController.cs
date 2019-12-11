@@ -1,3 +1,9 @@
+// Copyright (c) 2019, WebsitePanel-Support.net.
+// Distributed by websitepanel-support.net
+// Build and fixed by Key4ce - IT Professionals
+// https://www.key4ce.com
+// 
+// Original source:
 // Copyright (c) 2015, Outercurve Foundation.
 // All rights reserved.
 //
@@ -4074,7 +4080,7 @@ namespace WebsitePanel.EnterpriseServer
             c.AccountName = "wsp_fabrikam";
             c.FirstName = "WebsitePanel";
             c.LastName = "Support";
-            c.EmailAddress = "support@websitepanel.net";
+            c.EmailAddress = "support@websitepanel-support.net";
             c.AcceptAccounts = GetAccounts(0, ExchangeAccountType.Mailbox).ToArray();
             return c;
         }

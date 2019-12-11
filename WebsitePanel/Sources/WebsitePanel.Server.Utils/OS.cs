@@ -1,3 +1,9 @@
+// Copyright (c) 2019, WebsitePanel-Support.net.
+// Distributed by websitepanel-support.net
+// Build and fixed by Key4ce - IT Professionals
+// https://www.key4ce.com
+// 
+// Original source:
 // Copyright (c) 2015, Outercurve Foundation.
 // All rights reserved.
 //
@@ -433,7 +439,7 @@ namespace WebsitePanel.Server.Utils
             {
                 var name = objMO.Properties["Name"].Value.ToString().ToLower();
                 if (name.Contains("file server resource manager")
-                    || name.Contains("ressourcen-manager für dateiserver"))
+                    || name.Contains("ressourcen-manager fï¿½r dateiserver"))
                     return true;
             }
 

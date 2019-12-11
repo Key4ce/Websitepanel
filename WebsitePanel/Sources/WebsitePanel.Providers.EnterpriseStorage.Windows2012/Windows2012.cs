@@ -1,3 +1,9 @@
+// Copyright (c) 2019, WebsitePanel-Support.net.
+// Distributed by websitepanel-support.net
+// Build and fixed by Key4ce - IT Professionals
+// https://www.key4ce.com
+// 
+// Original source:
 // Copyright (c) 2015, Outercurve Foundation.
 // All rights reserved.
 //
@@ -557,7 +563,7 @@ namespace WebsitePanel.Providers.EnterpriseStorage
         protected WebDavSetting[] GetWebDavSettings(WebDavSetting[] settings)
         {
             // 06.09.2015 roland.breitschaft@x-company.de
-            // Define a List as an temporary Storage-Object. It´s easier to handle.
+            // Define a List as an temporary Storage-Object. Itï¿½s easier to handle.
             // var webDavSettings = new ArrayList();
             var webDavSettings = new List<WebDavSetting>();
 

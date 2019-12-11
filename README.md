@@ -9,4 +9,7 @@ WebsitePanel is a complete portal for Cloud Computing Companies and IT Providers
 
 To download the lasest Binaries or find more information visit our website at: 
 
-http://www.websitepanel.net/
+http://www.websitepanel-support.net
+
+For legacy paid support please contact Key4ce - IT Professionals at:
+https://www.key4ce.com
